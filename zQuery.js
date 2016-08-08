@@ -51,9 +51,21 @@
 
 })(window);
 
-// 根据单个选择器字符串查询
-var singleSelectorQuery = function(selector, root) {
-  var _root = root !== undefined ? root : document;
+// 根据单个选择器字符串查询，返回目标元素下［所有］符合的元素
+// @param {string} selector "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式的单个查询字符串
+// @param {object=} root 提供时以其为遍历起点，否则以document为起点
+// @return {array.<node>} 返回成员类型为node的数组或空数组
+var singleSelectorAllMatches = function(selector, root) {
+  var _root;
+  switch (root) {
+    case undefined:
+      _root = document;
+      break;
+    case null:
+      return [];
+    default:
+      _root = root;
+  }
   var walker = document.createTreeWalker(_root, NodeFilter.SHOW_ELEMENT, null, false);
   var currentNode = walker.nextNode();
   var result = [];
@@ -121,31 +133,42 @@ var singleSelectorQuery = function(selector, root) {
   return result;
 }
 
+// 根据单个选择器字符串查询，返回目标元素下［第一个］符合的元素
+// @param {string} selector "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式的单个查询字符串
+// @param {object=} root 提供时以其为遍历起点，否则以document为起点
+// @return {object|null} 返回node对象或null
+var singleSelectorFisrtMatch = function(selector, root) {
+  return singleSelectorAllMatches(selector, root)[0] || null;
+}
+
 var query = function(selector) {
   if (typeof selector !== 'string' || selector === '') {
     throw new Error('Expected STRING as selector.')
   }
-  var selectors = selector.split(' ');
-  var length = selectors.length;
-  console.log(selectors);
-  for (var i in selectors) {
+  var selectors = selector.split('/\s+/');
+  switch (selectors.length) {
+    case 1:
+      r1 = singleSelectorFisrtMatch(selectors[0]);
+    case 2:
+      r2 = singleSelectorFisrtMatch
+    default:
 
   }
-  var r1 = singleSelectorQuery(selectors[0])[0];
+
+  var r1 = singleSelectorFisrtMatch(selectors[0]);
   if (length === 1) {
     return r1;
-  } else {
-    if (r1 !== undefined) {
-      var r2 = singleSelectorQuery(selectors[1], r1)
+  } else if (length === 2) {
+      if (r1 !== undefined) {
+      var r2 = singleSelectorFisrtMatch(selectors[1], r1)
     }
   }
 
-
-  selectors.reduce(function(s1, s2){
-    return singleSelectorQuery(s1, s2)[0];
-  }, document.body);
-
+  // var r = selectors.reduce(function(s1, s2) {
+  //   return singleSelectorFisrtMatch(s2, s1);
+  // }, document.body)
+  // console.log(r)
 }
 
 // console.log(document.getElementById('test').hasClass('fuck'))
-console.log(query('body #test'))
+console.log(query('#test'))
