@@ -1,33 +1,12 @@
-// (function(window, undefined){
-//
-//   var zQuery = (function(){
-//     // zQuery对象就是zQuery.fn.init对象
-//     // 使用new关键字的话，返回的还是zQuery.fn.init对象，所以直接zQuery()即可
-//     var zQuery = function(selector, context){
-//       return new zQuery.fn.init(selector, context);
-//     };
-//     // 添加到zQuery.fn的方法，也被添加到zQuery.prototype，这样new zQuery()写法产生的实例也拥有这些方法
-//     zQuery.fn = zQuery.prototype = {
-//       constructor: zQuery,
-//       init: function(selector, context){
-//         // ...
-//       }
-//     };
-//     // 如上所述，使用zQuery(s, c)方法、不使用new zQuery()时，返回的是zQuery.fn.init对象；
-//     // 将它的构造函数原型也指向zQuery.fn，这样不管用哪种方法创建的zQuery对象都拥有添加到zQuery.fn的所有方法
-//     zQuery.fn.init.prototype = zQuery.fn;
-//     return zQuery;
-//   });
-//
-//   window.zQuery = window.$ = zQuery;
-//
-// })(window);
-
 (function(globalEnv){
+
+  /////////////////////////////////////////////
+  /////////////////  基本方法  /////////////////
+  /////////////////////////////////////////////
 
   // 根据［单个］选择器字符串查询，返回目标元素下［所有］符合的元素
   // @param {string} selector "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式的［单个］查询字符串
-  // @param {object=} root 提供时以其为遍历起点，否则以document为起点
+  // @param {object.node=} root 提供时以其为遍历起点，否则以document为起点
   // @return {array.<node>} 返回成员类型为node的数组或空数组
   var singleSelectorAllMatches = function(selector, root) {
     var _root;
@@ -61,7 +40,7 @@
         while (currentNode !== null) {
           var thisNodeMatches = true;
           for (var i in tarClasses) {
-            if (!currentNode.hasClass(tarClasses[i])) {
+            if (!currentNode.hasClass(tarClasses[i]) && tarClasses[i] !== '') {
               thisNodeMatches = false;
               break;
             }
@@ -105,7 +84,7 @@
         break;
 
       default:
-        throw new Error('Function "queryAll" accepts only 1 selector.')
+        throw new Error('Invalid selector string.')
 
     }
     return result;
@@ -113,58 +92,69 @@
 
   // 根据［单个］选择器字符串查询，返回目标元素下［第一个］符合的元素
   // @param {string} selector "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式的［单个］查询字符串
-  // @param {object=} root 提供时以其为遍历起点，否则以document为起点
-  // @return {object|null} 返回node对象或null
+  // @return {object.node|null} 返回node对象或null
   var singleSelectorOneMatch = function(selector, root) {
     return singleSelectorAllMatches(selector, root)[0] || null;
   };
 
-  // 根据［组合］选择器字符串查询，返回目标元素下［第一个］符合的元素
-  // @param {string} selectorGroup "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式的[以空格连接的］查询字符串
-  // @param {object=} root 提供时以其为遍历起点，否则以document为起点
-  // @return {object|null} 返回node对象或null
-  var multipleSelectorOneMatch = function(selectorGroup, root) {
+  // 根据［组合］选择器字符串查询，返回目标元素下［所有］符合的元素
+  // @param {string} selectorGroup "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式以空格连接的查询字符串
+  // @return {array.<node>} 返回成员类型为node的数组或空数组
+  var groupSelectorAllMatches = function(selectorGroup, root) {
     if (typeof selectorGroup !== 'string' || selectorGroup === '') {
       throw new Error('Expected STRING as selector.');
     }
     var selectorArr = selectorGroup.split(' ');
     switch (selectorArr.length) {
       case 1:
-        return singleSelectorOneMatch(selectorArr[0], root);
+        return singleSelectorAllMatches(selectorArr[0], root);
       case 2:
         var r1 = singleSelectorOneMatch(selectorArr[0]);
-        return singleSelectorOneMatch(selectorArr[1], r1);
+        return singleSelectorAllMatches(selectorArr[1], r1);
       case 3:
         var r1 = singleSelectorOneMatch(selectorArr[0]);
         var r2 = singleSelectorOneMatch(selectorArr[1], r1);
-        return singleSelectorOneMatch(selectorArr[2], r2);
+        return singleSelectorAllMatches(selectorArr[2], r2);
       case 4:
         var r1 = singleSelectorOneMatch(selectorArr[0]);
         var r2 = singleSelectorOneMatch(selectorArr[1], r1);
         var r3 = singleSelectorOneMatch(selectorArr[2], r2);
-        return singleSelectorOneMatch(selectorArr[3], r3);
+        return singleSelectorAllMatches(selectorArr[3], r3);
       default:
         throw new Error('Expected at most 4 selector snippets.')
     }
   };
 
-  globalEnv.queryOne = function(selectorGroup) {
-    return multipleSelectorOneMatch(selectorGroup, document.documentElement);
+  /////////////////////////////////////////////
+  //////////////  处理window对象  //////////////
+  /////////////////////////////////////////////
+
+  // 根据组合选择器字符串查询，返回文档内所有符合的元素
+  // @param {string} selectorGroup "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式以空格连接的查询字符串
+  // @return {array.<node>} 返回成员类型为node的数组或空数组
+  globalEnv.$ = globalEnv.query = function(selectorGroup) {
+    return groupSelectorAllMatches(selectorGroup, document.documentElement);
   };
 
-  globalEnv.queryAll = function(selector) {
-    return singleSelectorAllMatches(selector, document.documentElement);
+  // 在文档渲染结束、即将加载内嵌资源时，执行指定函数
+  globalEnv.domReady = function(fn) {
+    document.onreadystatechange = function(){
+      if (document.readyState === 'interactive') {
+        fn();
+      }
+    }
   };
 
-  // 为Node原型添加方法
+  /////////////////////////////////////////////
+  ///////////////  处理node原型  ///////////////
+  /////////////////////////////////////////////
+
   (function(nodePrototype) {
 
+    // 元素含指定类名时返回真
     nodePrototype.hasClass = function(className) {
       if (typeof className !== 'string') {
-        throw new Error('Expected STRING as class name.')
-      }
-      if (className === '') {
-        return true;
+        throw new Error('Expected STRING as target class name.')
       }
       var currentClasses = this.getAttribute('class');
       if (currentClasses !== null) {
@@ -175,22 +165,51 @@
       return false;
     }
 
-    nodePrototype.queryOne = function(selectorGroup){
-      return multipleSelectorOneMatch(selectorGroup, this);
+    // 根据组合选择器字符串查询，返回元素下所有符合的元素
+    // @param {string} selectorGroup "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式以空格连接的查询字符串
+    // @return {array.<node>} 返回成员类型为node的数组或空数组
+    nodePrototype.$ = nodePrototype.query = function(selectorGroup){
+      return groupSelectorAllMatches(selectorGroup, this);
     };
 
-    nodePrototype.queryAll = function(selector){
-      return singleSelectorAllMatches(selector, this);
-    };
-
+    // 获取或设置目标属性
+    // @param {string} tarAttr 目标属性名
+    // @param {string} tarValue 目标属性值
+    // @return {string|null|object.node} 获取时返回字符串或null；设置时返回自身
+    nodePrototype.attr = function(tarAttr, tarValue) {
+      if (typeof tarAttr !== 'string') {
+        throw new Error('Expected STRING as target attribute name.')
+      }
+      if (tarValue === undefined) {
+        return this.getAttribute(tarAttr);
+      } else {
+        if (typeof tarValue !== 'string') {
+          throw new Error('Expected STRING as target attribute value (if provided).');
+        } else {
+          this.setAttribute(tarAttr, tarValue);
+          return this;
+        }
+      }
+    }
 
   })(globalEnv.Node.prototype);
 
+  /////////////////////////////////////////////
+  ///////////////  处理array原型  //////////////
+  /////////////////////////////////////////////
 
+  (function(arrayPrototype) {
 
+    // arrayPrototype.not = function(unwantedSelector) {
+    //   var result = [];
+    //   for (var i in this) {
+    //     var currentNode = this[i];
+    //     if
+    //   }
+    // }
+
+  })(globalEnv.Array.prototype);
 })(window);
 
 
-// console.log(body.getElementById('test').hasClass('fuck'))
-console.log(document.body.queryAll('#dick .fuck'))
-console.log(queryAll('.fuck.shit'))
+console.log(document.body.query('body #dick .fuck.shit')[0].attr('f', 'f'))
