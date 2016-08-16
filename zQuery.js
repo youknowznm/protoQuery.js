@@ -4,6 +4,44 @@
   /////////////////  基本方法  /////////////////
   /////////////////////////////////////////////
 
+  // 判断单个节点是否符合单个选择器
+  var nodeMatchesSelector = function(tarNode, selector) {
+    if (!tarNode instanceof Node) {
+      throw new Error('Expected NODE as target node.');
+    }
+    if (typeof selector !== 'string' ) {
+      throw new Error('Expected STRING as selector.');
+    }
+    switch (true) {
+      // id选择器
+      case /^#([\w-]+)$/.test(selector):
+        return tarNode.id === RegExp.$1;
+      // 类选择器，支持多个类
+      case /^\.[\w-\.]+$/.test(selector):
+        var tarClasses = selector.split('.');
+        var thisNodeMatches;
+        for (var i in tarClasses) {
+          thisNodeMatches = true;
+          if (!tarNode.hasClass(tarClasses[i]) && tarClasses[i] !== null) {
+            thisNodeMatches = false;
+            break;
+          }
+        }
+        return thisNodeMatches;
+      // 标签类型选择器
+      case /^[\w]+$/.test(selector):
+        return tarNode.nodeName === selector.toUpperCase();
+      // 属性选择器，存在时
+      case /^\[([\w-]+)\]$/.test(selector):
+        return tarNode.hasAttribute(RegExp.$1);
+      // 属性选择器，为指定值时（值之间不能有空格）
+      case /^\[([\w-]+)=([\w-]+)\]$/.test(selector):
+        return tarNode.getAttribute(RegExp.$1) === RegExp.$2;
+      default:
+        throw new Error('Invalid selector string.');
+    }
+  }
+
   // 根据［单个］选择器字符串查询，返回目标元素下［所有］符合的元素
   // @param {string} selector "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式的［单个］查询字符串
   // @param {object.node=} root 提供时以其为遍历起点，否则以document为起点
@@ -22,70 +60,11 @@
     var walker = document.createTreeWalker(_root, NodeFilter.SHOW_ELEMENT, null, false);
     var currentNode = walker.nextNode();
     var result = [];
-    switch (true) {
-
-      case /^#([\w-]+)$/.test(selector):
-        var tarId = RegExp.$1;
-        while (currentNode !== null) {
-          if (currentNode.id === tarId) {
-            result.push(currentNode);
-            break;
-          }
-          currentNode = walker.nextNode();
-        }
-        break;
-
-      case /^\.[\w-\.]+$/.test(selector):
-        var tarClasses = selector.split('.');
-        while (currentNode !== null) {
-          var thisNodeMatches = true;
-          for (var i in tarClasses) {
-            if (!currentNode.hasClass(tarClasses[i]) && tarClasses[i] !== '') {
-              thisNodeMatches = false;
-              break;
-            }
-          }
-          if (thisNodeMatches) {
-            result.push(currentNode);
-          }
-          currentNode = walker.nextNode();
-        }
-        break;
-
-      case /^([\w-]+)$/.test(selector):
-        var tarTag = RegExp.$1;
-        while (currentNode !== null) {
-          if (currentNode.nodeName === tarTag.toUpperCase()) {
-            result.push(currentNode);
-          }
-          currentNode = walker.nextNode();
-        }
-        break;
-
-      case /^\[([\w-]+)\]$/.test(selector):
-        var tarAttr = RegExp.$1;
-        while (currentNode !== null) {
-          if (currentNode.hasAttribute(tarAttr)) {
-            result.push(currentNode);
-          }
-          currentNode = walker.nextNode();
-        }
-        break;
-
-      case /^\[([\w-]+)=([\w-]+)\]$/.test(selector):
-        var tarAttr = RegExp.$1;
-        var tarValue = RegExp.$2;
-        while (currentNode !== null) {
-          if (currentNode.getAttribute(tarAttr) === tarValue) {
-            result.push(currentNode);
-          }
-          currentNode = walker.nextNode();
-        }
-        break;
-
-      default:
-        throw new Error('Invalid selector string.')
-
+    while (currentNode !== null) {
+      if (nodeMatchesSelector(currentNode, selector)) {
+        result.push(currentNode);
+      }
+      currentNode = walker.nextNode();
     }
     return result;
   };
@@ -156,7 +135,7 @@
       if (typeof className !== 'string') {
         throw new Error('Expected STRING as target class name.')
       }
-      var currentClasses = this.getAttribute('class');
+      var currentClasses = this.className;
       if (currentClasses !== null) {
         if (currentClasses.indexOf(className) !== -1) {
           return true;
@@ -210,6 +189,5 @@
 
   })(globalEnv.Array.prototype);
 })(window);
-
 
 console.log(document.body.query('body #dick .fuck.shit')[0].attr('f', 'f'))
