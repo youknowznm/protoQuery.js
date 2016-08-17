@@ -22,7 +22,7 @@
         var thisNodeMatches;
         for (var i in tarClasses) {
           thisNodeMatches = true;
-          if (!tarNode.hasClass(tarClasses[i]) && tarClasses[i] !== '') {
+          if (!tarNode.hasClass(tarClasses[i]) && tarClasses[i] !== null) {
             thisNodeMatches = false;
             break;
           }
@@ -37,12 +37,11 @@
       // 属性选择器，为指定值时（值之间不能有空格）
       case /^\[([\w-]+)=([\w-]+)\]$/.test(selector):
         return tarNode.getAttribute(RegExp.$1) === RegExp.$2;
-      // 参数不符合任何选择器时抛出错误
       default:
         throw new Error('Invalid selector string.');
     }
   }
-  globalEnv.nm = nodeMatchesSelector
+
   // 根据［单个］选择器字符串查询，返回目标元素下［所有］符合的元素
   // @param {string} selector "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式的［单个］查询字符串
   // @param {object.node=} root 提供时以其为遍历起点，否则以document为起点
@@ -84,7 +83,6 @@
         return singleSelectorAllResults(selectorArr[0], root);
       case 2:
         var r1 = singleSelectorAllResults(selectorArr[0], root)[0];
-        console.log(r1)
         return singleSelectorAllResults(selectorArr[1], r1);
       case 3:
         var r1 = singleSelectorAllResults(selectorArr[0], root)[0];
@@ -132,13 +130,13 @@
         throw new Error('Expected STRING as target class name.')
       }
       var currentClasses = this.className;
-      if (currentClasses !== '') {
+      if (currentClasses !== null) {
         if (currentClasses.indexOf(className) !== -1) {
           return true;
         }
       }
       return false;
-    }
+    };
 
     // 根据组合选择器字符串查询，返回元素下所有符合的元素
     // @param {string} selectorGroup "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式以空格连接的查询字符串
@@ -167,6 +165,95 @@
       }
     };
 
+    // 返回目标元素的直接父元素
+    // @return {object} 元素节点或null
+    nodePrototype.parent = function(){
+      var tarElement = this.parentNode;
+      while (true) {
+        if (tarElement === null || tarElement.nodeType === 1) {
+          return tarElement;
+        } else {
+          tarElement = tarElement.parentNode;
+        }
+      }
+    };
+
+    // 返回目标元素的所有符合参数条件的父元素
+    // @return {array.<node>} 元素节点对象构成之数组
+    nodePrototype.matchedParents = function(selector){
+      var result = [];
+      var currentNode = this.parent();
+      while (currentNode !== null) {
+        if (nodeMatchesSelector(currentNode, selector)) {
+          result.push(currentNode);
+        }
+        currentNode = currentNode.parent();
+      }
+      return result;
+    };
+
+    // 返回目标元素的不符合参数条件的所有父元素
+    // @return {array.<node>} 元素节点对象构成之数组
+    nodePrototype.parentsUntil = function(selector){
+      var result = [];
+      var currentNode = this.parent();
+      while (currentNode !== null) {
+        if (!nodeMatchesSelector(currentNode, selector)) {
+          result.push(currentNode);
+        } else {
+          break;
+        }
+        currentNode = currentNode.parent();
+      }
+      return result;
+    };
+
+    // 返回目标元素的符合参数条件的最近的父元素，遍历包含元素自身
+    // @return {object} 元素节点或null
+    nodePrototype.closest = function(selector){
+      var currentNode = this;
+      while (currentNode !== null) {
+        if (nodeMatchesSelector(currentNode, selector)) {
+          return currentNode;
+        } else {
+          currentNode = currentNode.parent();
+        }
+      }
+      return null;
+    };
+
+    // 返回目标元素的符合参数条件的直接子元素
+    // @return {array.<node>} 元素节点对象构成之数组
+    nodePrototype.matchedChildren = function(selector){
+      var result = [];
+      var directChildNodes = this.childNodes;
+      var currentNode;
+      for (var i in directChildNodes) {
+        currentNode = directChildNodes[i];
+        if (currentNode.nodeType === 1 && nodeMatchesSelector(currentNode, selector)) {
+          result.push(currentNode);
+        }
+      }
+      return result;
+    };
+
+    // // 返回目标元素的所有符合参数条件的兄弟元素
+    // // @return {array.<node>} 元素节点对象构成之数组
+    // nodePrototype.siblings = function(selector){
+    //   var result = [];
+    //   if (!this.parent() === null) {
+    //     var allSiblings = this.parent.children;
+    //     for (var i in allSiblings) {
+    //       var currentNode = allSiblings[i];
+    //       console.log(currentNode)
+    //       if (nodeMatchesSelector(currentNode, selector)) {
+    //         result.push(currentNode);
+    //       }
+    //     }
+    //   }
+    //   return result;
+    // }
+
   })(globalEnv.Node.prototype);
 
   /////////////////////////////////////////////
@@ -175,18 +262,13 @@
 
   (function(arrayPrototype) {
 
-    // arrayPrototype.aaa = function(unwantedSelector) {
-    //   for (var i in this) {
-    //     console.log(this[i])
-    //     if (!nodeMatchesSelector(this[i], unwantedSelector)) {
-    //       this.splice(i, 1);
-    //     }
-    //   }
+    // arrayPrototype.not = function(unwantedSelector) {
+    //
     // };
 
   })(globalEnv.Array.prototype);
 
 })(window);
 
-// console.log(nm(document.getElementsByTagName('p')[0], '.fuck'));
-console.log(query('.shit.fuck'))
+// console.log(nm('.fuck.shit', document.documentElement));
+console.log(query('.fuck')[0].siblings('.fuck'))
