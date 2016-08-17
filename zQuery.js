@@ -22,7 +22,7 @@
         var thisNodeMatches;
         for (var i in tarClasses) {
           thisNodeMatches = true;
-          if (!tarNode.hasClass(tarClasses[i]) && tarClasses[i] !== null) {
+          if (!tarNode.hasClass(tarClasses[i]) && tarClasses[i] !== '') {
             thisNodeMatches = false;
             break;
           }
@@ -37,11 +37,12 @@
       // 属性选择器，为指定值时（值之间不能有空格）
       case /^\[([\w-]+)=([\w-]+)\]$/.test(selector):
         return tarNode.getAttribute(RegExp.$1) === RegExp.$2;
+      // 参数不符合任何选择器时抛出错误
       default:
         throw new Error('Invalid selector string.');
     }
   }
-
+  globalEnv.nm = nodeMatchesSelector
   // 根据［单个］选择器字符串查询，返回目标元素下［所有］符合的元素
   // @param {string} selector "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式的［单个］查询字符串
   // @param {object.node=} root 提供时以其为遍历起点，否则以document为起点
@@ -131,7 +132,7 @@
         throw new Error('Expected STRING as target class name.')
       }
       var currentClasses = this.className;
-      if (currentClasses !== null) {
+      if (currentClasses !== '') {
         if (currentClasses.indexOf(className) !== -1) {
           return true;
         }
@@ -164,7 +165,7 @@
           return this;
         }
       }
-    }
+    };
 
   })(globalEnv.Node.prototype);
 
@@ -174,16 +175,18 @@
 
   (function(arrayPrototype) {
 
-    // arrayPrototype.not = function(unwantedSelector) {
-    //   var result = [];
+    // arrayPrototype.aaa = function(unwantedSelector) {
     //   for (var i in this) {
-    //     var currentNode = this[i];
-    //     if
+    //     console.log(this[i])
+    //     if (!nodeMatchesSelector(this[i], unwantedSelector)) {
+    //       this.splice(i, 1);
+    //     }
     //   }
-    // }
+    // };
 
   })(globalEnv.Array.prototype);
+
 })(window);
 
-// console.log(nm('.fuck.shit', document.documentElement));
-console.log(query('body #dick .shit.fuck'))
+// console.log(nm(document.getElementsByTagName('p')[0], '.fuck'));
+console.log(query('.shit.fuck'))
