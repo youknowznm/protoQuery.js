@@ -37,6 +37,9 @@
       // 属性选择器，为指定值时（值之间不能有空格）
       case /^\[([\w-]+)=([\w-]+)\]$/.test(selector):
         return tarNode.getAttribute(RegExp.$1) === RegExp.$2;
+      // 选择器为*时直接返回真
+      case selector === '*':
+        return true;
       default:
         throw new Error('Invalid selector string.');
     }
@@ -141,7 +144,7 @@
     // 根据组合选择器字符串查询，返回元素下所有符合的元素
     // @param {string} selectorGroup "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式以空格连接的查询字符串
     // @return {array.<node>} 返回成员类型为node的数组或空数组
-    nodePrototype.$ = nodePrototype.query = function(selectorGroup){
+    nodePrototype.$ = nodePrototype.query = function(selectorGroup) {
       return groupSelectorAllResults(selectorGroup, this);
     };
 
@@ -167,7 +170,7 @@
 
     // 返回目标元素的直接父元素
     // @return {object} 元素节点或null
-    nodePrototype.parent = function(){
+    nodePrototype.parent = function() {
       var tarElement = this.parentNode;
       while (true) {
         if (tarElement === null || tarElement.nodeType === 1) {
@@ -180,7 +183,7 @@
 
     // 返回目标元素的所有符合参数条件的父元素
     // @return {array.<node>} 元素节点对象构成之数组
-    nodePrototype.matchedParents = function(selector){
+    nodePrototype.matchedParents = function(selector) {
       var result = [];
       var currentNode = this.parent();
       while (currentNode !== null) {
@@ -194,7 +197,7 @@
 
     // 返回目标元素的不符合参数条件的所有父元素
     // @return {array.<node>} 元素节点对象构成之数组
-    nodePrototype.parentsUntil = function(selector){
+    nodePrototype.parentsUntil = function(selector) {
       var result = [];
       var currentNode = this.parent();
       while (currentNode !== null) {
@@ -210,7 +213,7 @@
 
     // 返回目标元素的符合参数条件的最近的父元素，遍历包含元素自身
     // @return {object} 元素节点或null
-    nodePrototype.closest = function(selector){
+    nodePrototype.closest = function(selector) {
       var currentNode = this;
       while (currentNode !== null) {
         if (nodeMatchesSelector(currentNode, selector)) {
@@ -224,7 +227,7 @@
 
     // 返回目标元素的符合参数条件的直接子元素
     // @return {array.<node>} 元素节点对象构成之数组
-    nodePrototype.matchedChildren = function(selector){
+    nodePrototype.matchedChildren = function(selector) {
       var result = [];
       var directChildNodes = this.childNodes;
       var currentNode;
@@ -237,22 +240,95 @@
       return result;
     };
 
-    // // 返回目标元素的所有符合参数条件的兄弟元素
-    // // @return {array.<node>} 元素节点对象构成之数组
-    // nodePrototype.siblings = function(selector){
-    //   var result = [];
-    //   if (!this.parent() === null) {
-    //     var allSiblings = this.parent.children;
-    //     for (var i in allSiblings) {
-    //       var currentNode = allSiblings[i];
-    //       console.log(currentNode)
-    //       if (nodeMatchesSelector(currentNode, selector)) {
-    //         result.push(currentNode);
-    //       }
-    //     }
-    //   }
-    //   return result;
-    // }
+    // 返回目标元素之前的符合参数条件的最近的兄弟元素
+    // @return {object} 元素节点或null
+    nodePrototype.prev = function(selector) {
+      var prevSib = this.previousElementSibling;
+      while (prevSib !== null) {
+        if (nodeMatchesSelector(prevSib, selector)) {
+          return prevSib;
+        }
+        prevSib = prevSib.previousElementSibling;
+      }
+      return null;
+    };
+
+    // 返回目标元素之后的符合参数条件的最近的兄弟元素
+    // @return {object} 元素节点或null
+    nodePrototype.next = function(selector) {
+      var nextSib = this.nextElementSibling;
+      while (nextSib !== null) {
+        if (nodeMatchesSelector(nextSib, selector)) {
+          return nextSib;
+        }
+        nextSib = nextSib.nextElementSibling;
+      }
+      return null;
+    };
+
+    // 返回位于目标元素之前的所有符合参数条件的兄弟元素
+    // @return {array.<node>} 元素节点对象构成之数组
+    nodePrototype.prevAll = function(selector) {
+      var result = [];
+      var prevSib = this.previousElementSibling;
+      while (prevSib !== null) {
+        if (nodeMatchesSelector(prevSib, selector)) {
+          result.unshift(prevSib);
+        }
+        prevSib = prevSib.previousElementSibling;
+      }
+      return result;
+    }
+
+    // 返回位于目标元素之后的所有符合参数条件的兄弟元素
+    // @return {array.<node>} 元素节点对象构成之数组
+    nodePrototype.nextAll = function(selector) {
+      var result = [];
+      var nextSib = this.nextElementSibling;
+      while (nextSib !== null) {
+        if (nodeMatchesSelector(nextSib, selector)) {
+          result.push(nextSib);
+        }
+        nextSib = nextSib.nextElementSibling;
+      }
+      return result;
+    }
+
+    // 返回目标元素的所有符合参数条件的兄弟元素
+    // @return {array.<node>} 元素节点对象构成之数组
+    nodePrototype.siblings = function(selector) {
+      return this.prevAll(selector).concat(this.nextAll(selector));
+    };
+
+    // 返回目标元素之前、符合参数条件的元素（如有）之后的所有兄弟元素
+    // @return {array.<node>} 元素节点对象构成之数组
+    nodePrototype.prevUntil = function(selector) {
+      var result = [];
+      var prevSib = this.previousElementSibling;
+      while (prevSib !== null) {
+        if (nodeMatchesSelector(prevSib, selector)) {
+          break;
+        }
+        result.unshift(prevSib);
+        prevSib = prevSib.previousElementSibling;
+      }
+      return result;
+    }
+
+    // 返回目标元素之后、符合参数条件的元素（如有）之前的所有兄弟元素
+    // @return {array.<node>} 元素节点对象构成之数组
+    nodePrototype.nextUntil = function(selector) {
+      var result = [];
+      var nextSib = this.nextElementSibling;
+      while (nextSib !== null) {
+        if (nodeMatchesSelector(nextSib, selector)) {
+          break;
+        }
+        result.push(nextSib);
+        nextSib = nextSib.nextElementSibling;
+      }
+      return result;
+    }
 
   })(globalEnv.Node.prototype);
 
@@ -271,4 +347,4 @@
 })(window);
 
 // console.log(nm('.fuck.shit', document.documentElement));
-console.log(query('.fuck')[0].siblings('.fuck'))
+console.log(query('#test')[0].nextUntil('#black'))
