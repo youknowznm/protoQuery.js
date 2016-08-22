@@ -108,7 +108,7 @@
   // 根据组合选择器字符串查询，返回文档内所有符合的元素
   // @param {string} selectorGroup "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式以空格连接的查询字符串
   // @return {array.<node>} 返回成员类型为node的数组或空数组
-  globalEnv.$ = globalEnv.query = function(selectorGroup) {
+  globalEnv.query = function(selectorGroup) {
     return groupSelectorAllResults(selectorGroup, document.documentElement);
   };
 
@@ -144,7 +144,7 @@
     // 根据组合选择器字符串查询，返回元素下所有符合的元素
     // @param {string} selectorGroup "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式以空格连接的查询字符串
     // @return {array.<node>} 返回成员类型为node的数组或空数组
-    nodePrototype.$ = nodePrototype.query = function(selectorGroup) {
+    nodePrototype.query = function(selectorGroup) {
       return groupSelectorAllResults(selectorGroup, this);
     };
 
