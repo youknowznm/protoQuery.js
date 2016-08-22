@@ -1,10 +1,10 @@
 # zQuery
-***
+
 ###
 `jQuery`在未修改任何原生`JavaScript`对象原型的基础上实现了对节点实例的选择和操作，实在是屌。我才疏学浅，尝试通过在节点构造器的原型和全局变量`window`上添加若干方法和变量的途径，尽可能实现`jQuery`中已有的接口。实现顺序基于[jQuery Learning Center](http://learn.jquery.com)中api出现的顺序。
 
 ## API
-***
+
 ###
 
 *选择器*
