@@ -330,6 +330,29 @@
       return result;
     }
 
+    //
+    nodePrototype.css = function(tarStyle, tarValue) {
+      switch (typeof tarStyle) {
+        case 'object':
+          for (var i in tarStyle) {
+            console.log(tarStyle[i])
+            this.style[i] = tarStyle[i];
+          }
+          return this;
+        case 'string':
+          if (tarValue === undefined) {
+            return document.defaultView.getComputedStyle(this, null)[tarStyle];
+          }
+          if (typeof tarValue !== 'string') {
+            throw new Error('Expected STRING as target value.')
+          }
+          this.style[tarStyle] = tarValue;
+          return this;
+        default:
+          throw new Error('Expected STRING as target style name or OBJECT as style group.')
+      }
+    }
+
   })(globalEnv.Node.prototype);
 
   /////////////////////////////////////////////
@@ -347,4 +370,4 @@
 })(window);
 
 // console.log(nm('.fuck.shit', document.documentElement));
-console.log(query('#test')[0].nextUntil('#black'))
+console.log(query('#black')[0].css({backgroundColor: 'red', height: '200px'}))
