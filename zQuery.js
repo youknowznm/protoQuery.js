@@ -332,24 +332,32 @@
 
     //
     nodePrototype.css = function(tarStyle, tarValue) {
-      switch (typeof tarStyle) {
-        case 'object':
-          for (var i in tarStyle) {
-            console.log(tarStyle[i])
-            this.style[i] = tarStyle[i];
+      var changeSingleRule = function(name, value) {
+        this.style[name] = value;
+      }
+      switch (arguments.length) {
+        case 0:
+          throw new Error('Expected at least 1 parameter.');
+        case 1:
+          switch (typeof tarStyle) {
+            case 'string':
+              return document.defaultView.getComputedStyle(this, null)[tarStyle];
+            case 'object':
+              for (var i in tarStyle) {
+                changeSingleRule.call(this, )
+              }
+              return this;
+            default:
+              throw new Error('Expected STRING as target style name or OBJECT as style group.')
           }
-          return this;
-        case 'string':
-          if (tarValue === undefined) {
-            return document.defaultView.getComputedStyle(this, null)[tarStyle];
-          }
+        case 2:
           if (typeof tarValue !== 'string') {
-            throw new Error('Expected STRING as target value.')
+            throw new Error('Expected STRING as target style value.');
           }
-          this.style[tarStyle] = tarValue;
+          changeSingleRule.call(this, tarStyle, tarValue);
           return this;
         default:
-          throw new Error('Expected STRING as target style name or OBJECT as style group.')
+          throw new Error('Invalid parameter(s).');
       }
     }
 
@@ -370,4 +378,5 @@
 })(window);
 
 // console.log(nm('.fuck.shit', document.documentElement));
-console.log(query('#black')[0].css({backgroundColor: 'red', height: '200px'}))
+// console.log(query('#black')[0].css({backgroundColor: 'red', height: '200px'}))
+console.log(query('#black')[0].css('backgroundColor', 'red'))
