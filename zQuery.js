@@ -130,7 +130,7 @@
     // 元素含指定类名时返回真
     nodePrototype.hasClass = function(className) {
       if (typeof className !== 'string') {
-        throw new Error('Expected STRING as target class name.')
+        throw new Error('Expected STRING as target class name.');
       }
       var currentClasses = this.className;
       if (currentClasses !== null) {
@@ -140,6 +140,51 @@
       }
       return false;
     };
+
+    //
+    nodePrototype.addClass = function(className) {
+      if (typeof className !== 'string') {
+        throw new Error('Expected STRING as target class name.');
+      }
+      if (!this.hasClass(className) && className !== '') {
+        this.
+      }
+    }
+
+    // 设置或读取目标元素的样式
+    // @param {string|object} tarStyle 只提供此参数：为数值时返回该样式值；为对象时设置元素的多条规则
+    // @param {string?} tarValue 提供时设置指定样式的值
+    // @return {object|string|null} 读取时返回字符串或null；设置时返回自身
+    nodePrototype.css = function(tarStyle, tarValue) {
+      var changeSingleRule = function(name, value) {
+        this.style[name] = value;
+      }
+      switch (arguments.length) {
+        case 0:
+          throw new Error('Expected at least 1 parameter.');
+        case 1:
+          switch (typeof tarStyle) {
+            case 'string':
+              return document.defaultView.getComputedStyle(this, null)[tarStyle] || null;
+            case 'object':
+              for (var i in tarStyle) {
+                changeSingleRule.call(this, i, tarStyle[i]);
+              }
+              return this;
+            default:
+              throw new Error('Expected STRING as target style name or OBJECT as style group.')
+          }
+        case 2:
+          if (typeof tarValue !== 'string') {
+            throw new Error('Expected STRING as target style value.');
+          }
+          changeSingleRule.call(this, tarStyle, tarValue);
+          return this;
+        default:
+          throw new Error('Invalid parameter(s).');
+      }
+    }
+
 
     // 根据组合选择器字符串查询，返回元素下所有符合的元素
     // @param {string} selectorGroup "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式以空格连接的查询字符串
@@ -330,36 +375,6 @@
       return result;
     }
 
-    //
-    nodePrototype.css = function(tarStyle, tarValue) {
-      var changeSingleRule = function(name, value) {
-        this.style[name] = value;
-      }
-      switch (arguments.length) {
-        case 0:
-          throw new Error('Expected at least 1 parameter.');
-        case 1:
-          switch (typeof tarStyle) {
-            case 'string':
-              return document.defaultView.getComputedStyle(this, null)[tarStyle];
-            case 'object':
-              for (var i in tarStyle) {
-                changeSingleRule.call(this, )
-              }
-              return this;
-            default:
-              throw new Error('Expected STRING as target style name or OBJECT as style group.')
-          }
-        case 2:
-          if (typeof tarValue !== 'string') {
-            throw new Error('Expected STRING as target style value.');
-          }
-          changeSingleRule.call(this, tarStyle, tarValue);
-          return this;
-        default:
-          throw new Error('Invalid parameter(s).');
-      }
-    }
 
   })(globalEnv.Node.prototype);
 
@@ -379,4 +394,4 @@
 
 // console.log(nm('.fuck.shit', document.documentElement));
 // console.log(query('#black')[0].css({backgroundColor: 'red', height: '200px'}))
-console.log(query('#black')[0].css('backgroundColor', 'red'))
+console.log(query('#black')[0].css('ts'))
