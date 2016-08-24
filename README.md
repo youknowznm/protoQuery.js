@@ -3,7 +3,7 @@
 ###
 jQuery在未修改任何原生JavaScript对象原型的基础上实现了对节点实例的选择和操作，实在是屌。我才疏学浅，尝试通过在节点构造器的原型和全局变量`window`上添加若干方法和变量的途径，尽可能实现jQuery中已有的接口。实现顺序基于[jQuery Learning Center](http://learn.jquery.com)中api出现的顺序。
 
-## API
+# API
 
 ###
 *选择器*
@@ -16,11 +16,11 @@ jQuery在未修改任何原生JavaScript对象原型的基础上实现了对节�
 ###
 *属性与样式*
 - `Node.hasClass(className)` -> `{boolean}`
-* 判断此元素是否包含指定类名
+  * 判断此元素是否包含指定类名
 - `Node.attr(tarAttr, tarValue?)` -> `{node}`
-* 获取或设置此元素的目标属性
+  * 获取或设置此元素的目标属性
 - `Node.css(tarStyle, tarValue?)` -> `{node|string|null}`
-* 获取或设置此元素的样式，传入一个对象时设置多条
+  * 获取或设置此元素的样式，传入一个对象时设置多条
 
 ###
 *事件*
