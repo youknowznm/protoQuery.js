@@ -69,13 +69,6 @@
     return result;
   };
 
-  // // 根据［单个］选择器字符串查询，返回目标元素下［第一个］符合的元素
-  // // @param {string} selector "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式的［单个］查询字符串
-  // // @return {object.node|null} 返回node对象或null
-  // var singleSelectorOneMatch = function(selector, root) {
-  //   return singleSelectorAllResults(selector, root)[0] || null;
-  // };
-
   // 根据［组合］选择器字符串查询，返回目标元素下［所有］符合的元素
   // @param {string} selectorGroup "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式以空格连接的查询字符串
   // @return {array.<node>} 返回成员类型为node的数组或空数组
@@ -127,6 +120,8 @@
 
   (function(nodePrototype) {
 
+    ///////////////  样式和属性  ///////////////
+
     // 元素含指定类名时返回真
     nodePrototype.hasClass = function(tarClassName) {
       if (typeof tarClassName !== 'string') {
@@ -150,7 +145,7 @@
         this.className = this.className.concat(' ' + tarClassName.trim());
       }
       return this;
-    }
+    };
 
     // 为目标元素移除指定类
     nodePrototype.removeClass = function(tarClassName) {
@@ -163,7 +158,7 @@
         this.className = classArr.join(' ');
       }
       return this;
-    }
+    };
 
     // 目标元素含指定类时移除，否则添加
     nodePrototype.toggleClass = function(tarClassName) {
@@ -176,7 +171,7 @@
         this.addClass(tarClassName);
       }
       return this;
-    }
+    };
 
     // 设置或读取目标元素的样式
     // @param {string|object} tarStyle 只提供此参数：为数值时返回该样式值；为对象时设置元素的多条规则
@@ -216,13 +211,6 @@
         default:
           throw new Error('Invalid parameter(s).');
       }
-    }
-
-    // 根据组合选择器字符串查询，返回元素下所有符合的元素
-    // @param {string} selectorGroup "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式以空格连接的查询字符串
-    // @return {array.<node>} 返回成员类型为node的数组或空数组
-    nodePrototype.query = function(selectorGroup) {
-      return groupSelectorAllResults(selectorGroup, this);
     };
 
     // 获取或设置目标属性
@@ -243,6 +231,15 @@
           return this;
         }
       }
+    };
+
+    ///////////////  选择和遍历  ///////////////
+
+    // 根据组合选择器字符串查询，返回元素下所有符合的元素
+    // @param {string} selectorGroup "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式以空格连接的查询字符串
+    // @return {array.<node>} 返回成员类型为node的数组或空数组
+    nodePrototype.query = function(selectorGroup) {
+      return groupSelectorAllResults(selectorGroup, this);
     };
 
     // 返回目标元素的直接父元素
@@ -355,7 +352,7 @@
         prevSib = prevSib.previousElementSibling;
       }
       return result;
-    }
+    };
 
     // 返回位于目标元素之后的所有符合参数条件的兄弟元素
     // @return {array.<node>} 元素节点对象构成之数组
@@ -369,7 +366,7 @@
         nextSib = nextSib.nextElementSibling;
       }
       return result;
-    }
+    };
 
     // 返回目标元素的所有符合参数条件的兄弟元素
     // @return {array.<node>} 元素节点对象构成之数组
@@ -390,7 +387,7 @@
         prevSib = prevSib.previousElementSibling;
       }
       return result;
-    }
+    };
 
     // 返回目标元素之后、符合参数条件的元素（如有）之前的所有兄弟元素
     // @return {array.<node>} 元素节点对象构成之数组
@@ -405,6 +402,12 @@
         nextSib = nextSib.nextElementSibling;
       }
       return result;
+    };
+
+    ///////////////  事件  ///////////////
+
+    nodePrototype.on = function(event, fn) {
+      this.addEventListener
     }
 
 
@@ -438,6 +441,4 @@
 })(window);
 
 query('#damn')[0].toggleClass('fuks');
-console.log(query('#damn')[0])
-// query('#damn')[0].toggleClass('fuck');
-// console.log(query('#damn')[0])
+console.log(query('#damn')[0]);
