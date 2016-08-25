@@ -128,13 +128,13 @@
   (function(nodePrototype) {
 
     // 元素含指定类名时返回真
-    nodePrototype.hasClass = function(className) {
-      if (typeof className !== 'string') {
+    nodePrototype.hasClass = function(tarClassName) {
+      if (typeof tarClassName !== 'string') {
         throw new Error('Expected STRING as target class name.');
       }
-      var currentClasses = this.className;
-      if (currentClasses !== null) {
-        if (currentClasses.indexOf(className) !== -1) {
+      var classArr = this.className.split(/\s+/);
+      if (classArr[0] !== '') {
+        if (classArr.indexOf(tarClassName) !== -1) {
           return true;
         }
       }
@@ -142,23 +142,39 @@
     };
 
     //
-    nodePrototype.addClass = function(className) {
-      if (typeof className !== 'string') {
+    nodePrototype.addClass = function(tarClassName) {
+      if (typeof tarClassName !== 'string') {
         throw new Error('Expected STRING as target class name.');
       }
-      if (!this.hasClass(className) && className !== '') {
-        this.
+      if (!this.hasClass(tarClassName)) {
+        this.className = this.className.concat(' ' + tarClassName.trim());
       }
+      return this;
+    }
+
+    //
+    nodePrototype.removeClass = function(tarClassName) {
+      if (typeof tarClassName !== 'string') {
+        throw new Error('Expected STRING as target class name.');
+      }
+      if (this.hasClass(tarClassName)) {
+        var classArr = this.className.split(/\s+/);
+        var newClassName = classArr.push()
+      }
+      return this;
     }
 
     // 设置或读取目标元素的样式
     // @param {string|object} tarStyle 只提供此参数：为数值时返回该样式值；为对象时设置元素的多条规则
-    // @param {string?} tarValue 提供时设置指定样式的值
+    // @param {string|number?} tarValue 提供时设置指定样式的值
     // @return {object|string|null} 读取时返回字符串或null；设置时返回自身
     nodePrototype.css = function(tarStyle, tarValue) {
       var changeSingleRule = function(name, value) {
+        if (/^.*\d$/.test(value)) {
+          value = value.concat('px');
+        }
         this.style[name] = value;
-      }
+      };
       switch (arguments.length) {
         case 0:
           throw new Error('Expected at least 1 parameter.');
@@ -175,11 +191,14 @@
               throw new Error('Expected STRING as target style name or OBJECT as style group.')
           }
         case 2:
-          if (typeof tarValue !== 'string') {
-            throw new Error('Expected STRING as target style value.');
+          switch (typeof tarValue) {
+            case 'string':
+            case 'number':
+              changeSingleRule.call(this, tarStyle, tarValue + '');
+              return this;
+            default:
+              throw new Error('Expected STRING or NUMBER as target style value.');
           }
-          changeSingleRule.call(this, tarStyle, tarValue);
-          return this;
         default:
           throw new Error('Invalid parameter(s).');
       }
@@ -390,8 +409,21 @@
 
   })(globalEnv.Array.prototype);
 
+  /////////////////////////////////////////////
+  ///////////////  处理string原型  //////////////
+  /////////////////////////////////////////////
+
+  (function(stringPrototype) {
+
+    // 去除字符串首尾的空格
+    stringPrototype.trim = function() {
+      return this.replace(/^\s+|\s+/g, '');
+    };
+
+  })(globalEnv.String.prototype);
+
 })(window);
 
 // console.log(nm('.fuck.shit', document.documentElement));
 // console.log(query('#black')[0].css({backgroundColor: 'red', height: '200px'}))
-console.log(query('#black')[0].css('ts'))
+console.log(query('#damn')[0].removeClass(''))
