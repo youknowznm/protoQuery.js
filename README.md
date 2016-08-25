@@ -8,15 +8,21 @@ jQuery在未修改任何原生JavaScript对象原型的基础上实现了对节�
 ###
 *选择器*
 - `window.query(selector)` -> `{array.<node>}`
-* 根据组合选择器字符串（"#header"，".item"，"ul"，"[type]"，"[type=radio]"，"\*"）查询，返回文档内所有符合的元素
+  * 根据组合选择器字符串（"#header"，".item"，"ul"，"[type]"，"[type=radio]"，"\*"）查询，返回文档内所有符合的元素
 - `Node.query(selector)` -> `{array.<node>}`
-* 根据组合选择器字符串（"#header"，".item"，"ul"，"[type]"，"[type=radio]"，"\*"）查询，返回此元素下所有符合的元素
+  * 根据组合选择器字符串（"#header"，".item"，"ul"，"[type]"，"[type=radio]"，"\*"）查询，返回此元素下所有符合的元素
 
 
 ###
 *属性与样式*
 - `Node.hasClass(className)` -> `{boolean}`
   * 判断此元素是否包含指定类名
+- `Node.addClass(className)` -> `{node}`
+  * 添加类
+- `Node.removeClass(className)` -> `{node}`
+  * 移除类
+- `Node.toggleClass(className)` -> `{node}`
+  * 已有则移除，否则添加之
 - `Node.attr(tarAttr, tarValue?)` -> `{node}`
   * 获取或设置此元素的目标属性
 - `Node.css(tarStyle, tarValue?)` -> `{node|string|null}`

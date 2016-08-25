@@ -141,7 +141,7 @@
       return false;
     };
 
-    //
+    // 为目标元素添加指定类
     nodePrototype.addClass = function(tarClassName) {
       if (typeof tarClassName !== 'string') {
         throw new Error('Expected STRING as target class name.');
@@ -152,14 +152,28 @@
       return this;
     }
 
-    //
+    // 为目标元素移除指定类
     nodePrototype.removeClass = function(tarClassName) {
       if (typeof tarClassName !== 'string') {
         throw new Error('Expected STRING as target class name.');
       }
       if (this.hasClass(tarClassName)) {
         var classArr = this.className.split(/\s+/);
-        var newClassName = classArr.push()
+        classArr.splice(classArr.indexOf(tarClassName), 1);
+        this.className = classArr.join(' ');
+      }
+      return this;
+    }
+
+    // 目标元素含指定类时移除，否则添加
+    nodePrototype.toggleClass = function(tarClassName) {
+      if (typeof tarClassName !== 'string') {
+        throw new Error('Expected STRING as target class name.');
+      }
+      if (this.hasClass(tarClassName)) {
+        this.removeClass(tarClassName);
+      } else {
+        this.addClass(tarClassName);
       }
       return this;
     }
@@ -203,7 +217,6 @@
           throw new Error('Invalid parameter(s).');
       }
     }
-
 
     // 根据组合选择器字符串查询，返回元素下所有符合的元素
     // @param {string} selectorGroup "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式以空格连接的查询字符串
@@ -424,6 +437,7 @@
 
 })(window);
 
-// console.log(nm('.fuck.shit', document.documentElement));
-// console.log(query('#black')[0].css({backgroundColor: 'red', height: '200px'}))
-console.log(query('#damn')[0].removeClass(''))
+query('#damn')[0].toggleClass('fuks');
+console.log(query('#damn')[0])
+// query('#damn')[0].toggleClass('fuck');
+// console.log(query('#damn')[0])
