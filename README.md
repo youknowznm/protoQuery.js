@@ -33,11 +33,14 @@ jQuery在未修改任何原生JavaScript对象原型的基础上实现了对节�
 - `window.domReady(fn)` -> `{undefined}`
   * 在文档渲染结束、即将加载内嵌资源时，执行指定函数
 - `Node.on(obj)` -> `{node}`
-- `Node.on(event, function)` -> `{node}`
+- `Node.on(events, function)` -> `{node}`
   * 添加事件监听。
     － 1 键：单一事件名；值：该事件的监听函数
     － 2 arg1：单一或多个事件名；arg2：对应的监听函数
-
+- `Node.off(obj)` -> `{node}`
+- `Node.off(events, function)` -> `{node}`
+  * 移除事件监听。参数同上
+  
 ###
 *遍历*
 ####

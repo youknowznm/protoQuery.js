@@ -481,11 +481,70 @@
       return this;
     };
 
-    // 移除事件监听
-    // @param {string} event 事件名称
-    // @param {function} fn 监听函数
-    nodePrototype.off = function(events, fn) {
+    // 移除事件监听。参数同上
+    nodePrototype.off = function(arg1, arg2) {
+      switch (arguments.length) {
+        case 1:
+          if (typeof arg1 !== 'object') {
+            throw new Error('Expected PLAIN OBJECT if only 1 argument is provided.');
+          }
+          for (var i in arg1) {
+            handleSingleListener(this, i, arg1[i], false);
+          }
+          break;
+        case 2:
+          if (typeof arg1 !== 'string') {
+            throw new Error('Expected STRING as target event(s)\' name.');
+          }
+          if (typeof arg2 !== 'function') {
+            throw new Error('Expected FUNCTION as target event listener.');
+          }
+          var events = arg1.split(/\s+/);
+          for (var i in events) {
+            handleSingleListener(this, events[i], arg2, false);
+          }
+          break;
+        default:
+          throw new Error('Expected 1~2 arguments.');
+      }
+      return this;
+    };
 
+    //
+    nodePrototype.one = function(arg1, arg2) {
+      var that = this;
+      switch (arguments.length) {
+        case 1:
+          if (typeof arg1 !== 'object') {
+            throw new Error('Expected PLAIN OBJECT if only 1 argument is provided.');
+          }
+          for (var i in arg1) {
+            handleSingleListener(this,
+                                 i,
+                                 function(){
+                                   console.log(that.off)
+                                   arg1[i]();
+                                   that.off(i, arg1[i]);
+                                 },
+                                 true);
+          }
+          break;
+        case 2:
+          if (typeof arg1 !== 'string') {
+            throw new Error('Expected STRING as target event(s)\' name.');
+          }
+          if (typeof arg2 !== 'function') {
+            throw new Error('Expected FUNCTION as target event listener.');
+          }
+          var events = arg1.split(/\s+/);
+          for (var i in events) {
+            handleSingleListener(this, events[i], arg2, true);
+          }
+          break;
+        default:
+          throw new Error('Expected 1~2 arguments.');
+      }
+      return this;
     };
 
 
@@ -529,5 +588,6 @@ function showTar(e){
 query('#damn')[0].css({
   'height': '120',
   'background-color': 'yellow',
-}).on('click mouseover', showTar)
-// console.log(query('#damn')[0]);
+}).one({
+  'click': showTar,
+})
