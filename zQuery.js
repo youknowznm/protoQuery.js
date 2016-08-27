@@ -96,43 +96,40 @@
 
   // 在单一元素上添加/删除单一监听函数
   // @param {node} ele 目标元素节点
-  // @param {string} evt 目标事件
+  // @param {string} evts 单一或多个目标事件
   // @param {function} fn 监听函数
   // @param {boolean} option true添加, false删除
-  var handleSingleListener = function(ele, evt, fn, option) {
+  var handleSingleListener = function(ele, evts, fn, option) {
     if (ele.nodeType !== 1) {
       throw new Error('Expected ELEMENT NODE as target.')
     }
-    if (typeof evt !== 'string') {
-      throw new Error('Expected STRING as target event.')
+    if (typeof evts !== 'string') {
+      throw new Error('Expected STRING as target event(s).')
     }
+    evts = evts.split(/\s/);
     if (typeof fn !== 'function') {
       throw new Error('Expected FUNCTION as event listener.')
     }
-    if (option === true) {
-      switch (true) {
-        case ele.addEventListener !== undefined:
-          ele.addEventListener(evt, fn, false);
-          break;
-        case ele.attachEvent !== undefined:
-          ele.attachEvent('on' + evt, fn);
-          break;
-        default:
-          throw new Error('You might well update your bloody browser.')
-      }
-    } else {
-      switch (true) {
-        case ele.removeEventListener !== undefined:
-          ele.removeEventListener(evt, fn, false);
-          break;
-        case ele.detachEvent !== undefined:
-          ele.detachEvent('on' + evt, fn);
-          break;
-        default:
-          throw new Error('You might well update your bloody browser.')
-      }
+    switch (option) {
+      case true:
+        for (var i in evts) {
+          if (ele.addEventListener) {
+            ele.addEventListener(evts[i], fn, false);
+          } else {
+            ele.attachEvent('on' + evts[i], fn);
+          }
+        }
+        break;
+      case false:
+        for (var i in evts) {
+          if (ele.removeEventListener) {
+            ele.removeEventListener(evts[i], fn, false);
+          } else {
+            ele.detachEvent('on' + evts[i], fn);
+          }
+        }
+        break;
     }
-    return this;
   }
 
   /////////////////////////////////////////////
@@ -449,7 +446,7 @@
 
     // 添加事件监听
     //  1 arg
-    //  @param {object} arg1 键：事件名；值：该事件的监听函数
+    //  @param {object} arg1 键：一个或多个事件名；值：该事件的监听函数
     //  2 arg
     //  @param {string} events 一个或多个事件名
     //  @param {function} fn 监听函数
@@ -470,10 +467,7 @@
           if (typeof arg2 !== 'function') {
             throw new Error('Expected FUNCTION as target event listener.');
           }
-          var events = arg1.split(/\s+/);
-          for (var i in events) {
-            handleSingleListener(this, events[i], arg2, true);
-          }
+          handleSingleListener(this, arg1, arg2, true);
           break;
         default:
           throw new Error('Expected 1~2 arguments.');
@@ -499,10 +493,7 @@
           if (typeof arg2 !== 'function') {
             throw new Error('Expected FUNCTION as target event listener.');
           }
-          var events = arg1.split(/\s+/);
-          for (var i in events) {
-            handleSingleListener(this, events[i], arg2, false);
-          }
+          handleSingleListener(this, arg1, arg2, false);
           break;
         default:
           throw new Error('Expected 1~2 arguments.');
@@ -510,42 +501,6 @@
       return this;
     };
 
-    //
-    nodePrototype.one = function(arg1, arg2) {
-      var that = this;
-      switch (arguments.length) {
-        case 1:
-          if (typeof arg1 !== 'object') {
-            throw new Error('Expected PLAIN OBJECT if only 1 argument is provided.');
-          }
-          for (var i in arg1) {
-            handleSingleListener(this,
-                                 i,
-                                 function(){
-                                   console.log(that.off)
-                                   arg1[i]();
-                                   that.off(i, arg1[i]);
-                                 },
-                                 true);
-          }
-          break;
-        case 2:
-          if (typeof arg1 !== 'string') {
-            throw new Error('Expected STRING as target event(s)\' name.');
-          }
-          if (typeof arg2 !== 'function') {
-            throw new Error('Expected FUNCTION as target event listener.');
-          }
-          var events = arg1.split(/\s+/);
-          for (var i in events) {
-            handleSingleListener(this, events[i], arg2, true);
-          }
-          break;
-        default:
-          throw new Error('Expected 1~2 arguments.');
-      }
-      return this;
-    };
 
 
 
@@ -588,6 +543,6 @@ function showTar(e){
 query('#damn')[0].css({
   'height': '120',
   'background-color': 'yellow',
-}).one({
-  'click': showTar,
+}).on({
+  'click mouseover': showTar,
 })
