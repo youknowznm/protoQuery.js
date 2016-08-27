@@ -26,12 +26,17 @@ jQuery在未修改任何原生JavaScript对象原型的基础上实现了对节�
 - `Node.attr(tarAttr, tarValue?)` -> `{node}`
   * 获取或设置此元素的目标属性
 - `Node.css(tarStyle, tarValue?)` -> `{node|string|null}`
-  * 获取或设置此元素的样式，传入一个对象时设置多条
+  * 获取或设置此元素的样式，传入一个对象时设置多条。目标值为整数时添加px单位
 
 ###
 *事件*
 - `window.domReady(fn)` -> `{undefined}`
   * 在文档渲染结束、即将加载内嵌资源时，执行指定函数
+- `Node.on(obj)` -> `{node}`
+- `Node.on(event, function)` -> `{node}`
+  * 添加事件监听。
+    － 1 键：单一事件名；值：该事件的监听函数
+    － 2 arg1：单一或多个事件名；arg2：对应的监听函数
 
 ###
 *遍历*

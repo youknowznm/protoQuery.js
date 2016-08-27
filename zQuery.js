@@ -43,11 +43,11 @@
       default:
         throw new Error('Invalid selector string.');
     }
-  }
+  };
 
   // 根据［单个］选择器字符串查询，返回目标元素下［所有］符合的元素
   // @param {string} selector "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式的［单个］查询字符串
-  // @param {object.node=} root 提供时以其为遍历起点，否则以document为起点
+  // @param {node?} root 提供时以其为遍历起点，否则以document为起点
   // @return {array.<node>} 返回成员类型为node的数组或空数组
   var singleSelectorAllResults = function(selector, root) {
     if (root === undefined) {
@@ -93,6 +93,47 @@
         throw new Error('Expected at most 4 selector snippets.')
     }
   };
+
+  // 在单一元素上添加/删除单一监听函数
+  // @param {node} ele 目标元素节点
+  // @param {string} evt 目标事件
+  // @param {function} fn 监听函数
+  // @param {boolean} option true添加, false删除
+  var handleSingleListener = function(ele, evt, fn, option) {
+    if (ele.nodeType !== 1) {
+      throw new Error('Expected ELEMENT NODE as target.')
+    }
+    if (typeof evt !== 'string') {
+      throw new Error('Expected STRING as target event.')
+    }
+    if (typeof fn !== 'function') {
+      throw new Error('Expected FUNCTION as event listener.')
+    }
+    if (option === true) {
+      switch (true) {
+        case ele.addEventListener !== undefined:
+          ele.addEventListener(evt, fn, false);
+          break;
+        case ele.attachEvent !== undefined:
+          ele.attachEvent('on' + evt, fn);
+          break;
+        default:
+          throw new Error('You might well update your bloody browser.')
+      }
+    } else {
+      switch (true) {
+        case ele.removeEventListener !== undefined:
+          ele.removeEventListener(evt, fn, false);
+          break;
+        case ele.detachEvent !== undefined:
+          ele.detachEvent('on' + evt, fn);
+          break;
+        default:
+          throw new Error('You might well update your bloody browser.')
+      }
+    }
+    return this;
+  }
 
   /////////////////////////////////////////////
   //////////////  处理window对象  //////////////
@@ -174,10 +215,10 @@
     };
 
     // 设置或读取目标元素的样式
-    // @param {string|object} tarStyle 只提供此参数：为数值时返回该样式值；为对象时设置元素的多条规则
-    // @param {string|number?} tarValue 提供时设置指定样式的值
-    // @return {object|string|null} 读取时返回字符串或null；设置时返回自身
-    nodePrototype.css = function(tarStyle, tarValue) {
+    // @param {string|object} arg1 只提供此参数：为数值时返回该样式值；为对象时设置元素的多条规则
+    // @param {string|number?} arg2 提供时设置指定样式的值
+    // @return {node|string|null} 读取时返回字符串或null；设置时返回自身
+    nodePrototype.css = function(arg1, arg2) {
       var changeSingleRule = function(name, value) {
         if (/^.*\d$/.test(value)) {
           value = value.concat('px');
@@ -186,30 +227,30 @@
       };
       switch (arguments.length) {
         case 0:
-          throw new Error('Expected at least 1 parameter.');
+          throw new Error('Expected at least 1 argument.');
         case 1:
-          switch (typeof tarStyle) {
+          switch (typeof arg1) {
             case 'string':
-              return document.defaultView.getComputedStyle(this, null)[tarStyle] || null;
+              return document.defaultView.getComputedStyle(this, null)[arg1] || null;
             case 'object':
-              for (var i in tarStyle) {
-                changeSingleRule.call(this, i, tarStyle[i]);
+              for (var i in arg1) {
+                changeSingleRule.call(this, i, arg1[i]);
               }
               return this;
             default:
               throw new Error('Expected STRING as target style name or OBJECT as style group.')
           }
         case 2:
-          switch (typeof tarValue) {
+          switch (typeof arg2) {
             case 'string':
             case 'number':
-              changeSingleRule.call(this, tarStyle, tarValue + '');
+              changeSingleRule.call(this, arg1, arg2 + '');
               return this;
             default:
               throw new Error('Expected STRING or NUMBER as target style value.');
           }
         default:
-          throw new Error('Invalid parameter(s).');
+          throw new Error('Expected 1~2 arguments.');
       }
     };
 
@@ -243,7 +284,7 @@
     };
 
     // 返回目标元素的直接父元素
-    // @return {object} 元素节点或null
+    // @return {node} 元素节点或null
     nodePrototype.parent = function() {
       var tarElement = this.parentNode;
       while (true) {
@@ -286,7 +327,7 @@
     };
 
     // 返回目标元素的符合参数条件的最近的父元素，遍历包含元素自身
-    // @return {object} 元素节点或null
+    // @return {node} 元素节点或null
     nodePrototype.closest = function(selector) {
       var currentNode = this;
       while (currentNode !== null) {
@@ -315,7 +356,7 @@
     };
 
     // 返回目标元素之前的符合参数条件的最近的兄弟元素
-    // @return {object} 元素节点或null
+    // @return {node} 元素节点或null
     nodePrototype.prev = function(selector) {
       var prevSib = this.previousElementSibling;
       while (prevSib !== null) {
@@ -328,7 +369,7 @@
     };
 
     // 返回目标元素之后的符合参数条件的最近的兄弟元素
-    // @return {object} 元素节点或null
+    // @return {node} 元素节点或null
     nodePrototype.next = function(selector) {
       var nextSib = this.nextElementSibling;
       while (nextSib !== null) {
@@ -406,9 +447,47 @@
 
     ///////////////  事件  ///////////////
 
-    nodePrototype.on = function(event, fn) {
-      this.addEventListener
-    }
+    // 添加事件监听
+    //  1 arg
+    //  @param {object} arg1 键：事件名；值：该事件的监听函数
+    //  2 arg
+    //  @param {string} events 一个或多个事件名
+    //  @param {function} fn 监听函数
+    nodePrototype.on = function(arg1, arg2) {
+      switch (arguments.length) {
+        case 1:
+          if (typeof arg1 !== 'object') {
+            throw new Error('Expected PLAIN OBJECT if only 1 argument is provided.');
+          }
+          for (var i in arg1) {
+            handleSingleListener(this, i, arg1[i], true);
+          }
+          break;
+        case 2:
+          if (typeof arg1 !== 'string') {
+            throw new Error('Expected STRING as target event(s)\' name.');
+          }
+          if (typeof arg2 !== 'function') {
+            throw new Error('Expected FUNCTION as target event listener.');
+          }
+          var events = arg1.split(/\s+/);
+          for (var i in events) {
+            handleSingleListener(this, events[i], arg2, true);
+          }
+          break;
+        default:
+          throw new Error('Expected 1~2 arguments.');
+      }
+      return this;
+    };
+
+    // 移除事件监听
+    // @param {string} event 事件名称
+    // @param {function} fn 监听函数
+    nodePrototype.off = function(events, fn) {
+
+    };
+
 
 
   })(globalEnv.Node.prototype);
@@ -440,5 +519,15 @@
 
 })(window);
 
-query('#damn')[0].toggleClass('fuks');
-console.log(query('#damn')[0]);
+function showColor(){
+  alert(this.css('background-color'));
+}
+function showTar(e){
+  console.log(e.target)
+}
+
+query('#damn')[0].css({
+  'height': '120',
+  'background-color': 'yellow',
+}).on('click mouseover', showTar)
+// console.log(query('#damn')[0]);
