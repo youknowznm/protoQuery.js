@@ -34,12 +34,16 @@ jQuery在未修改任何原生JavaScript对象原型的基础上实现了对节�
   * 在文档渲染结束、即将加载内嵌资源时，执行指定函数
 - `Node.on(obj)` -> `{node}`
 - `Node.on(events, function)` -> `{node}`
-  * 添加事件监听。
+- `Node.on(events, delegationSelector, function)` -> `{node}`
+  * 添加事件监听
     － 1 键：单一或多个事件名；值：该事件的监听函数
-    － 2 arg1：单一或多个事件名；arg2：对应的监听函数
+    － 2 events：单一或多个事件名；function：对应的监听函数
+    － 3 events：单一或多个事件名；delegationSelector：被代理元素的选择字符串；function：监听函数
 - `Node.off(obj)` -> `{node}`
 - `Node.off(events, function)` -> `{node}`
-  * 移除事件监听。参数同上
+  * 移除事件监听
+    － 1 键：单一或多个事件名；值：该事件的监听函数
+    － 2 arg1：单一或多个事件名；arg2：对应的监听函数
 
 ###
 *遍历*

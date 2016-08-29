@@ -5,7 +5,7 @@
   /////////////////////////////////////////////
 
   // 判断单个节点是否符合单个选择器
-  var nodeMatchesSelector = function(tarNode, selector) {
+  nodeMatchesSelector = function(tarNode, selector) {
     if (!tarNode instanceof Node) {
       throw new Error('Expected NODE as target node.');
     }
@@ -17,12 +17,12 @@
       case /^#([\w-]+)$/.test(selector):
         return tarNode.id === RegExp.$1;
       // 类选择器，支持多个类
-      case /^\.[\w-\.]+$/.test(selector):
-        var tarClasses = selector.split('.');
+      case /^\.([\w-\.]+)$/.test(selector):
+        var tarClasses = RegExp.$1.split('.');
         var thisNodeMatches;
         for (var i in tarClasses) {
           thisNodeMatches = true;
-          if (!tarNode.hasClass(tarClasses[i]) && tarClasses[i] !== null) {
+          if (!tarNode.hasClass(tarClasses[i])) {
             thisNodeMatches = false;
             break;
           }
@@ -98,37 +98,51 @@
   // @param {node} ele 目标元素节点
   // @param {string} evts 单一或多个目标事件
   // @param {function} fn 监听函数
-  // @param {boolean} option true添加, false删除
-  var handleSingleListener = function(ele, evts, fn, option) {
+  // @param {object} options 'method'为'add'或'remove'；提供'delegationSelector'时代理监听
+  var handleSingleListener = function(ele, evts, fn, options) {
     if (ele.nodeType !== 1) {
       throw new Error('Expected ELEMENT NODE as target.')
     }
     if (typeof evts !== 'string') {
       throw new Error('Expected STRING as target event(s).')
     }
-    evts = evts.split(/\s/);
     if (typeof fn !== 'function') {
       throw new Error('Expected FUNCTION as event listener.')
     }
-    switch (option) {
-      case true:
-        for (var i in evts) {
-          if (ele.addEventListener) {
-            ele.addEventListener(evts[i], fn, false);
-          } else {
-            ele.attachEvent('on' + evts[i], fn);
-          }
+    var handleEachEvent = null;
+    switch (options.method) {
+      case 'add':
+        if (options.delegationSelector !== undefined) {
+          handleEachEvent = function(evtName){
+            ele.addEventListener(evtName, function(evtObj){
+              var tar = evtObj.target;
+              if (tar.is(options.delegationSelector)) {
+                fn.call(this, evtObj);
+              }
+            }, false);
+          };
+        } else {
+          handleEachEvent = function(evtName) {
+            ele.addEventListener(evtName, fn, false);
+          };
         }
         break;
-      case false:
-        for (var i in evts) {
-          if (ele.removeEventListener) {
-            ele.removeEventListener(evts[i], fn, false);
-          } else {
-            ele.detachEvent('on' + evts[i], fn);
-          }
-        }
+      case 'remove':
+        handleEachEvent = function(evtName) {
+          ele.removeEventListener(evtName, fn, false);
+        };
         break;
+    }
+    var evts = evts.split(/\s/);
+    for (var i in evts) {
+      handleEachEvent(evts[i]);
+    }
+  };
+
+  // 基本动画
+  var transformGradiently(ele, tarStyle, tarValue, duration) {
+    var processStyle = function(ele, tarStyle, tarValue) {
+      var currStyle = ele.css(tarStyle);
     }
   }
 
@@ -279,6 +293,11 @@
     nodePrototype.query = function(selectorGroup) {
       return groupSelectorAllResults(selectorGroup, this);
     };
+
+    //
+    nodePrototype.is = function(selector) {
+      return nodeMatchesSelector(this, selector);
+    }
 
     // 返回目标元素的直接父元素
     // @return {node} 元素节点或null
@@ -448,18 +467,22 @@
     //  1 arg
     //  @param {object} arg1 键：一个或多个事件名；值：该事件的监听函数
     //  2 arg
-    //  @param {string} events 一个或多个事件名
-    //  @param {function} fn 监听函数
-    nodePrototype.on = function(arg1, arg2) {
+    //  @param {string} arg1 一个或多个事件名
+    //  @param {function} arg2 监听函数
+    //  3 arg
+    //  @param {string} arg1 一个或多个事件名
+    //  @param {string} arg2 被代理者的选择字符串
+    //  @param {function} arg3 监听函数
+    nodePrototype.on = function(arg1, arg2, arg3) {
       switch (arguments.length) {
         case 1:
           if (typeof arg1 !== 'object') {
             throw new Error('Expected PLAIN OBJECT if only 1 argument is provided.');
           }
           for (var i in arg1) {
-            handleSingleListener(this, i, arg1[i], true);
+            handleSingleListener(this, i, arg1[i], {method: 'add'});
           }
-          break;
+          return this;
         case 2:
           if (typeof arg1 !== 'string') {
             throw new Error('Expected STRING as target event(s)\' name.');
@@ -467,15 +490,31 @@
           if (typeof arg2 !== 'function') {
             throw new Error('Expected FUNCTION as target event listener.');
           }
-          handleSingleListener(this, arg1, arg2, true);
-          break;
+          handleSingleListener(this, arg1, arg2, {method: 'add'});
+          return this;
+        case 3:
+          if (typeof arg1 !== 'string') {
+            throw new Error('Expected STRING as target event(s)\' name.');
+          }
+          if (typeof arg2 !== 'string') {
+            throw new Error('Expected STRING as selector for delegated elements.');
+          }
+          if (typeof arg3 !== 'function') {
+            throw new Error('Expected FUNCTION as target event listener.');
+          }
+          handleSingleListener(this, arg1, arg3, {method: 'add', delegationSelector: arg2});
+          return this;
         default:
-          throw new Error('Expected 1~2 arguments.');
+          throw new Error('Expected 1~3 arguments.');
       }
-      return this;
     };
 
-    // 移除事件监听。参数同上
+    // 移除事件监听。未提供代理移除的方法
+    //  1 arg
+    //  @param {object} arg1 键：一个或多个事件名；值：该事件的监听函数
+    //  2 arg
+    //  @param {string} arg1 一个或多个事件名
+    //  @param {function} arg2 监听函数
     nodePrototype.off = function(arg1, arg2) {
       switch (arguments.length) {
         case 1:
@@ -483,9 +522,9 @@
             throw new Error('Expected PLAIN OBJECT if only 1 argument is provided.');
           }
           for (var i in arg1) {
-            handleSingleListener(this, i, arg1[i], false);
+            handleSingleListener(this, i, arg1[i], {method: 'remove'});
           }
-          break;
+          return this;
         case 2:
           if (typeof arg1 !== 'string') {
             throw new Error('Expected STRING as target event(s)\' name.');
@@ -493,15 +532,12 @@
           if (typeof arg2 !== 'function') {
             throw new Error('Expected FUNCTION as target event listener.');
           }
-          handleSingleListener(this, arg1, arg2, false);
-          break;
+          handleSingleListener(this, arg1, arg2, {method: 'remove'});
+          return this;
         default:
           throw new Error('Expected 1~2 arguments.');
       }
-      return this;
     };
-
-
 
 
   })(globalEnv.Node.prototype);
@@ -537,12 +573,7 @@ function showColor(){
   alert(this.css('background-color'));
 }
 function showTar(e){
-  console.log(e.target)
+  console.log(e.target);
 }
 
-query('#damn')[0].css({
-  'height': '120',
-  'background-color': 'yellow',
-}).on({
-  'click mouseover': showTar,
-})
+query('body')[0].on('click mouseover', '#black', showTar);
