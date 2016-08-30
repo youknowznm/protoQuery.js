@@ -140,11 +140,40 @@
   };
 
   // 基本动画
-  var transformGradiently(ele, tarStyle, tarValue, duration) {
-    var processStyle = function(ele, tarStyle, tarValue) {
-      var currStyle = ele.css(tarStyle);
+  var transformGradiently = function(ele, tarStyle, tarValue) {
+    var fullStyleValue = ele.css(tarStyle);
+    var currentValue = parseFloat(fullStyleValue);
+    if (['opacity'].indexOf(tarStyle) !== -1) {
+      currentValue *= 100;
+      tarValue *= 100;
     }
-  }
+    if (!isFinite(currentValue)) {
+      throw new Error('Expected a number-type style value.');
+    }
+    var styleSuffix = fullStyleValue.match(/^\d+(.*)$/)[1] || '';
+    console.log(styleSuffix)
+    var cycleId = setInterval(function(){
+      switch (true) {
+        case currentValue < tarValue:
+          currentValue += (tarValue - currentValue) > 10 ? Math.floor((tarValue - currentValue) / 10) : 2;
+          break;
+        case currentValue > tarValue:
+          currentValue -= (currentValue - tarValue) > 10 ? Math.floor((currentValue - tarValue) / 10) : 2;
+          break;
+        default:
+        clearInterval(cycleId);
+      }
+      if (['opacity'].indexOf(tarStyle) !== -1) {
+        console.log(typeof (currentValue/100))
+        console.log(tarStyle)
+        ele.css(tarStyle, currentValue/100);
+      } else {
+        ele.css(tarStyle, currentValue + styleSuffix);
+      }
+    }, 20);
+  };
+
+  globalEnv.tg = transformGradiently;
 
   /////////////////////////////////////////////
   //////////////  处理window对象  //////////////
@@ -568,12 +597,3 @@
   })(globalEnv.String.prototype);
 
 })(window);
-
-function showColor(){
-  alert(this.css('background-color'));
-}
-function showTar(e){
-  console.log(e.target);
-}
-
-query('body')[0].on('click mouseover', '#black', showTar);
