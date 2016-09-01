@@ -1,5 +1,8 @@
 (function(globalEnv){
 
+  var NUMBER_TYPE_STYLE_NAMES = ['opacity'];
+  var FLOAT_TYPE_STYLE_NAMES = ['opacity'];
+
   /////////////////////////////////////////////
   /////////////////  基本方法  /////////////////
   /////////////////////////////////////////////
@@ -139,11 +142,16 @@
     }
   };
 
+  globalEnv.onGoingAnimations = {};
+
   // 基本动画
-  var transformGradiently = function(ele, tarStyle, tarValue) {
+  // @param {node} ele 目标元素
+  // @param {string} tarStyle 目标样式名
+  // @param {string} tarValue 目标样式值
+  var changeSingleRuleGradiently = function(ele, tarStyle, tarValue) {
     var fullStyleValue = ele.css(tarStyle);
     var currentValue = parseFloat(fullStyleValue);
-    if (['opacity'].indexOf(tarStyle) !== -1) {
+    if (FLOAT_TYPE_STYLE_NAMES.indexOf(tarStyle) !== -1) {
       currentValue *= 100;
       tarValue *= 100;
     }
@@ -151,29 +159,26 @@
       throw new Error('Expected a number-type style value.');
     }
     var styleSuffix = fullStyleValue.match(/^\d+(.*)$/)[1] || '';
-    console.log(styleSuffix)
     var cycleId = setInterval(function(){
       switch (true) {
         case currentValue < tarValue:
-          currentValue += (tarValue - currentValue) > 10 ? Math.floor((tarValue - currentValue) / 10) : 2;
+          currentValue += Math.ceil((tarValue - currentValue) / 10);
           break;
         case currentValue > tarValue:
-          currentValue -= (currentValue - tarValue) > 10 ? Math.floor((currentValue - tarValue) / 10) : 2;
+          currentValue -= Math.ceil((currentValue - tarValue) / 10);
           break;
         default:
-        clearInterval(cycleId);
+          clearInterval(cycleId);
+          globalEnv.onGoingAnimations.cycleId = false;
       }
-      if (['opacity'].indexOf(tarStyle) !== -1) {
-        console.log(typeof (currentValue/100))
-        console.log(tarStyle)
-        ele.css(tarStyle, currentValue/100);
+      if (FLOAT_TYPE_STYLE_NAMES.indexOf(tarStyle) !== -1) {
+        ele.css(tarStyle, currentValue / 100);
       } else {
         ele.css(tarStyle, currentValue + styleSuffix);
       }
-    }, 20);
+    }, 10);
+    globalEnv.onGoingAnimations.cycleId = true;
   };
-
-  globalEnv.tg = transformGradiently;
 
   /////////////////////////////////////////////
   //////////////  处理window对象  //////////////
@@ -260,8 +265,8 @@
     // @return {node|string|null} 读取时返回字符串或null；设置时返回自身
     nodePrototype.css = function(arg1, arg2) {
       var changeSingleRule = function(name, value) {
-        if (/^.*\d$/.test(value)) {
-          value = value.concat('px');
+        if (/^.*\d$/.test(value) && NUMBER_TYPE_STYLE_NAMES.indexOf(name) === -1) {
+          value += 'px';
         }
         this.style[name] = value;
       };
@@ -294,6 +299,20 @@
       }
     };
 
+    // 渐变目标的一个或多个样式
+    //  @param {object} arg1 键：样式名；值：样式值
+    //  @param {function} arg2 完成的回调函数
+    nodePrototype.transform = function(styleObj, callback) {
+      if (typeof styleObj !== 'object') {
+        throw new Error('Expected PLAIN OBJECT containing style key-value pairs.');
+      }
+      for (var i in styleObj) {
+        changeSingleRuleGradiently(this, i, styleObj[i]);
+      }
+      return this;
+
+    };
+
     // 获取或设置目标属性
     // @param {string} tarAttr 目标属性名
     // @param {string} tarValue 目标属性值
@@ -323,10 +342,10 @@
       return groupSelectorAllResults(selectorGroup, this);
     };
 
-    //
+    // 目标元素本身符合字符串时返回真
     nodePrototype.is = function(selector) {
       return nodeMatchesSelector(this, selector);
-    }
+    };
 
     // 返回目标元素的直接父元素
     // @return {node} 元素节点或null
@@ -568,20 +587,68 @@
       }
     };
 
+    ///////////////  捷径  ///////////////
+
+    nodePrototype.width = function(value) {
+      return value === undefined
+        ? this.css('width')
+        : this.css('width', value);
+    };
+    nodePrototype.height = function(value) {
+      return value === undefined
+        ? this.css('height')
+        : this.css('height', value);
+    };
+
+    nodePrototype.show = function(option) {
+      if (this.css('display') === 'none') {
+        switch (option) {
+          case 'transform':
+            var initWidth = parseInt(this.width());
+            var initHeight = parseInt(this.height());
+            this.css({
+              display : 'block',
+              width : 0,
+              height : 0
+            });
+            this.transform({
+              width: initWidth,
+              height: initHeight
+            });
+            break;
+          default:
+            this.css('display', 'block');
+        }
+      }
+      return this;
+    };
+
+    nodePrototype.hide = function(option) {
+      if (this.css('display') !== 'none') {
+        switch (option) {
+          case 'transform':
+            this.transform({
+              width: 0,
+              height: 0
+            });
+            break;
+          default:
+            this.css('display', 'none');
+        }
+      }
+      return this;
+    };
+
+    nodePrototype.fadeOut = function(){
+      if (this.css('display') !== 'none') {
+        this.transform('opacity', 0);
+        this.hide();
+      }
+    };
+
 
   })(globalEnv.Node.prototype);
 
-  /////////////////////////////////////////////
-  ///////////////  处理array原型  //////////////
-  /////////////////////////////////////////////
-
-  (function(arrayPrototype) {
-
-    // arrayPrototype.not = function(unwantedSelector) {
-    //
-    // };
-
-  })(globalEnv.Array.prototype);
 
   /////////////////////////////////////////////
   ///////////////  处理string原型  //////////////
