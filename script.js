@@ -9,4 +9,6 @@ function showTar(e){
 // var t = query('#black')[0].on('click mouseover', '#black', showTar);
 var t = query('#black')[0];
 
-console.log(t.show('transform'))
+t.fadeOut()
+
+// console.log(zQueryUtil)

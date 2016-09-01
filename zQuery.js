@@ -3,6 +3,12 @@
   var NUMBER_TYPE_STYLE_NAMES = ['opacity'];
   var FLOAT_TYPE_STYLE_NAMES = ['opacity'];
 
+  var zQueryUtil = (function(){
+    return {
+      onGoingAnimations: []
+    };
+  })();
+
   /////////////////////////////////////////////
   /////////////////  基本方法  /////////////////
   /////////////////////////////////////////////
@@ -142,7 +148,6 @@
     }
   };
 
-  globalEnv.onGoingAnimations = {};
 
   // 基本动画
   // @param {node} ele 目标元素
@@ -168,16 +173,16 @@
           currentValue -= Math.ceil((currentValue - tarValue) / 10);
           break;
         default:
+          zQueryUtil.onGoingAnimations.splice(zQueryUtil.onGoingAnimations.indexOf(cycleId), 1);
           clearInterval(cycleId);
-          globalEnv.onGoingAnimations.cycleId = false;
       }
       if (FLOAT_TYPE_STYLE_NAMES.indexOf(tarStyle) !== -1) {
         ele.css(tarStyle, currentValue / 100);
       } else {
         ele.css(tarStyle, currentValue + styleSuffix);
       }
-    }, 10);
-    globalEnv.onGoingAnimations.cycleId = true;
+    }, 20);
+    zQueryUtil.onGoingAnimations.push(cycleId);
   };
 
   /////////////////////////////////////////////
@@ -301,7 +306,7 @@
 
     // 渐变目标的一个或多个样式
     //  @param {object} arg1 键：样式名；值：样式值
-    //  @param {function} arg2 完成的回调函数
+    //  @param {function?} arg2 完成后的回调函数
     nodePrototype.transform = function(styleObj, callback) {
       if (typeof styleObj !== 'object') {
         throw new Error('Expected PLAIN OBJECT containing style key-value pairs.');
@@ -309,8 +314,15 @@
       for (var i in styleObj) {
         changeSingleRuleGradiently(this, i, styleObj[i]);
       }
+      if (typeof callback === 'function') {
+        var id = setInterval(function(){
+          if (zQueryUtil.onGoingAnimations[0] === undefined) {
+            clearInterval(id);
+            callback();
+          }
+        }, 10);
+      }
       return this;
-
     };
 
     // 获取或设置目标属性
@@ -589,6 +601,7 @@
 
     ///////////////  捷径  ///////////////
 
+    // 读写元素宽度或高度
     nodePrototype.width = function(value) {
       return value === undefined
         ? this.css('width')
@@ -599,7 +612,7 @@
         ? this.css('height')
         : this.css('height', value);
     };
-
+    // 显示/隐藏元素。参数为'transform'时从左上角开始动画，否则即时
     nodePrototype.show = function(option) {
       if (this.css('display') === 'none') {
         switch (option) {
@@ -622,7 +635,6 @@
       }
       return this;
     };
-
     nodePrototype.hide = function(option) {
       if (this.css('display') !== 'none') {
         switch (option) {
@@ -638,17 +650,54 @@
       }
       return this;
     };
-
-    nodePrototype.fadeOut = function(){
-      if (this.css('display') !== 'none') {
-        this.transform('opacity', 0);
-        this.hide();
+    // 渐变透明度以显示/隐藏元素
+    nodePrototype.fadeIn = function() {
+      if (this.css('display') === 'none') {
+        this.css({
+          opacity : 0,
+          display : 'block',
+        });
+        this.transform({
+          opacity: 1
+        });
       }
+      return this;
+    };
+    nodePrototype.fadeOut = function() {
+      if (this.css('display') !== 'none') {
+        var that = this;
+        this.transform({'opacity': 0}, function(){
+          that.hide();
+        });
+      }
+      return this;
+    };
+    // 渐变高度以显示/隐藏元素
+    nodePrototype.slideDown = function() {
+      if (this.css('display') === 'none') {
+        var initHeight = parseInt(this.height());
+        this.css({
+          height : 0,
+          display : 'block',
+        });
+        this.transform({
+          height: initHeight
+        });
+      }
+      return this;
+    };
+    nodePrototype.slideUp = function() {
+      if (this.css('display') !== 'none') {
+        var that = this;
+        this.transform({'height': 0}, function(){
+          that.hide();
+        });
+      }
+      return this;
     };
 
 
   })(globalEnv.Node.prototype);
-
 
   /////////////////////////////////////////////
   ///////////////  处理string原型  //////////////
