@@ -205,6 +205,44 @@
     }
   };
 
+  //
+  globalEnv.clone = function(source) {
+    var result;
+    switch (typeof target) {
+      case 'boolean':
+      case 'number':
+      case 'string':
+        result = source;
+        break;
+      case 'object':
+        switch (true) {
+          case (source instanceof Date):
+            result = new Date(source.getTime());
+            break;
+          case (Array.isArray(source)):
+            result = [];
+            for (var key in source) {
+              result[key] = clone(source[key]);
+            }
+            break;
+          default:
+            result = {};
+            for (var prop in source) {
+              result[prop] = clone(source[prop]);
+            }
+        }
+      default:
+        throw new Error('Interesting input: ' + ((typeof target) + ''));
+    }
+  };
+
+  //
+  globalEnv.uniq = function(arr) {
+    if (!Array.isArray(arr)) {
+      throw new Error('Expected ARRAY to process.');
+    }
+  };
+
   /////////////////////////////////////////////
   ///////////////  处理node原型  ///////////////
   /////////////////////////////////////////////
@@ -711,5 +749,11 @@
     };
 
   })(globalEnv.String.prototype);
+
+  /////////////////////////////////////////////
+  ///////////////////  杂项  ///////////////////
+  /////////////////////////////////////////////
+
+
 
 })(window);
