@@ -241,7 +241,17 @@
     if (!Array.isArray(arr)) {
       throw new Error('Expected ARRAY to process.');
     }
+    var result = [];
+    for (var i in arr) {
+      var currentItem = arr[i];
+      if (result.indexOf(currentItem) === -1) {
+        result.push(currentItem);
+      }
+    }
+    return result;
   };
+
+
 
   /////////////////////////////////////////////
   ///////////////  处理node原型  ///////////////
@@ -362,6 +372,26 @@
       }
       return this;
     };
+
+    //
+    nodePrototype.position = function() {
+      var top = this.offsetTop;
+      var left = this.offsetLeft;
+      return {top, left};
+    };
+
+    //
+    nodePrototype.offset = function() {
+      var top = this.offsetTop;
+      var left = this.offsetLeft;
+      var posParent = this.offsetParent;
+      while (posParent !== null) {
+        top += posParent.offsetTop;
+        left += posParent.offsetLeft;
+        posParent = posParent.offsetParent;
+      }
+      return {top, left};
+    }
 
     // 获取或设置目标属性
     // @param {string} tarAttr 目标属性名
@@ -735,6 +765,7 @@
     };
 
 
+
   })(globalEnv.Node.prototype);
 
   /////////////////////////////////////////////
@@ -747,6 +778,17 @@
     stringPrototype.trim = function() {
       return this.replace(/^\s+|\s+/g, '');
     };
+
+    //
+    stringPrototype.isEmail = function() {
+      return /^([a-zA-Z\d]+)\w@(\w+)(\.[a-zA-Z]{2,}){1,2}$/.test(this);
+    }
+
+    //
+    stringPrototype.isCnCellNumber = function() {
+      return /^1\d{10}$/.test(this);
+    }
+
 
   })(globalEnv.String.prototype);
 

@@ -11,4 +11,4 @@ var t = query('#black')[0];
 
 t.fadeOut()
 
-console.log(window.clone)
+console.log(t.offset())
