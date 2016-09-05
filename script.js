@@ -11,4 +11,5 @@ var t = query('#black')[0];
 
 t.fadeOut()
 
-console.log(t.offset())
+console.log('0100-02-22'.isValidDate())
+console.log(t.cookie)

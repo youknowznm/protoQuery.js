@@ -205,7 +205,7 @@
     }
   };
 
-  //
+  // todo
   globalEnv.clone = function(source) {
     var result;
     switch (typeof target) {
@@ -236,7 +236,7 @@
     }
   };
 
-  //
+  // todo
   globalEnv.uniq = function(arr) {
     if (!Array.isArray(arr)) {
       throw new Error('Expected ARRAY to process.');
@@ -250,6 +250,71 @@
     }
     return result;
   };
+
+  //
+  globalEnv.cookie = function(arg1, arg2, ar3) {
+    switch (arguments.length) {
+      case 1:
+        if (typeof arg1 !== 'string') {
+          throw new Error('Expected STRING as target cookie name.');
+        }
+        break;
+      default:
+        if (typeof arg1 !== 'string') {
+          throw new Error('Expected STRING as target cookie name.');
+        }
+        if (typeof arg2 !== 'string') {
+          throw new Error('Expected STRING as target cookie value.');
+        }
+        var cookieText = encodeURIComponent(arg1) + '=' + encodeURIComponent(arg2);
+        if (ar3 !== undefined) {
+          if (typeof ar3 !== 'number') {
+            throw new Error('Expected NUMBER as expire day (if provided).');
+          }
+          var expireDate = new Date();
+          expireDate.setDate(expireDate.getDate() + expireDays);
+          cookieText = cookieText + '; expires=' + expireDate.toUTCString();
+        }
+    }
+    document.cookie = cookieText;
+  };
+
+  //
+  globalEnv.ajax = function(url, options) {
+    var type = options.type === undefined ? 'post' : options.type;
+    var data;
+    switch (typeof options.data) {
+      case 'string':
+        data = encodeURIComponent(options.data);
+        break;
+      case 'object':
+        var dataArr = [];
+        for (var key in options.data) {
+          dataArr.push(encodeURIComponent(key) + '=' + encodeURIComponent(options.data[key]));
+        }
+        data = dataArr.join('&');
+        break;
+      default:
+        throw new Error('Expected STRING or OBJECT as data to send.');
+    }
+    var onDone = typeof options.onDone === 'function' ? options.onDone : function() {
+      alert('Your XHR was done. (' + this.status + ')');
+    };
+    var onFail = typeof options.onFail === 'function' ? options.onFail : function() {
+      alert('Your XHR failed. (' + this.status + ')');
+    };
+    var xhr = new XMLHttpRequest();
+    xhr.open(type, url, true);
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+
+        }
+      }
+    }
+
+    xhr.send(data);
+  }
 
 
 
@@ -779,15 +844,33 @@
       return this.replace(/^\s+|\s+/g, '');
     };
 
-    //
+    //todo
     stringPrototype.isEmail = function() {
       return /^([a-zA-Z\d]+)\w@(\w+)(\.[a-zA-Z]{2,}){1,2}$/.test(this);
-    }
+    };
 
-    //
+    //todo
     stringPrototype.isCnCellNumber = function() {
       return /^1\d{10}$/.test(this);
-    }
+    };
+
+    //todo
+    stringPrototype.isValidDate = function() {
+      if ((/^([012]\d\d\d)-(([01]\d)-([0123]\d))$/).test(this)) {
+        var y = + RegExp.$1;
+        var m = + RegExp.$3;
+        var d = + RegExp.$4;
+        var md = RegExp.$2;
+        if (y !== 0 && m !== 0 && d !== 0) {
+          if (y < 2100 && m < 13 && d < 32) {
+            if (['02-30', '02-31', '04-31', '06-31', '09-31', '11-31'].indexOf(md) === -1) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    };
 
 
   })(globalEnv.String.prototype);
