@@ -148,7 +148,6 @@
     }
   };
 
-
   // 基本动画
   // @param {node} ele 目标元素
   // @param {string} tarStyle 目标样式名
@@ -205,7 +204,7 @@
     }
   };
 
-  // todo
+  // 复制原始类型值或一般对象
   globalEnv.clone = function(source) {
     var result;
     switch (typeof target) {
@@ -236,7 +235,7 @@
     }
   };
 
-  // todo
+  // 返回去重的新数组（限定为基本类型值组成），原数组未改动
   globalEnv.uniq = function(arr) {
     if (!Array.isArray(arr)) {
       throw new Error('Expected ARRAY to process.');
@@ -251,13 +250,21 @@
     return result;
   };
 
-  //
+  // todo
   globalEnv.cookie = function(arg1, arg2, ar3) {
+    var cookieArr = document.cookie.split(/;\s*/);
+    var cookieObj = {};
+    for (var i in cookieArr) {
+      // cookieObj.
+    }
     switch (arguments.length) {
       case 1:
         if (typeof arg1 !== 'string') {
           throw new Error('Expected STRING as target cookie name.');
         }
+        var result = cookieArr.filter(function(item, index, arr){
+          return item.test()
+        })
         break;
       default:
         if (typeof arg1 !== 'string') {
@@ -279,7 +286,7 @@
     document.cookie = cookieText;
   };
 
-  //
+  // todo
   globalEnv.ajax = function(url, options) {
     var type = options.type === undefined ? 'post' : options.type;
     var data;
@@ -308,15 +315,14 @@
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
-
+          onDone();
+        } else {
+          onFail();
         }
       }
     }
-
     xhr.send(data);
-  }
-
-
+  };
 
   /////////////////////////////////////////////
   ///////////////  处理node原型  ///////////////
@@ -438,14 +444,14 @@
       return this;
     };
 
-    //
+    // 返回元素相对于父定位元素之坐标
     nodePrototype.position = function() {
       var top = this.offsetTop;
       var left = this.offsetLeft;
       return {top, left};
     };
 
-    //
+    // 返回元素相对于浏览器窗口之坐标
     nodePrototype.offset = function() {
       var top = this.offsetTop;
       var left = this.offsetLeft;
@@ -829,8 +835,6 @@
       return this;
     };
 
-
-
   })(globalEnv.Node.prototype);
 
   /////////////////////////////////////////////
@@ -844,17 +848,17 @@
       return this.replace(/^\s+|\s+/g, '');
     };
 
-    //todo
+    // 判断字符串是否符合常见邮箱格式
     stringPrototype.isEmail = function() {
       return /^([a-zA-Z\d]+)\w@(\w+)(\.[a-zA-Z]{2,}){1,2}$/.test(this);
     };
 
-    //todo
-    stringPrototype.isCnCellNumber = function() {
+    // 判断字符串是否符合中国手机号码
+    stringPrototype.isEmail = function() {
       return /^1\d{10}$/.test(this);
     };
 
-    //todo
+    // 判断字符串是否为有效日期，无法判断闰年
     stringPrototype.isValidDate = function() {
       if ((/^([012]\d\d\d)-(([01]\d)-([0123]\d))$/).test(this)) {
         var y = + RegExp.$1;
@@ -872,13 +876,6 @@
       return false;
     };
 
-
   })(globalEnv.String.prototype);
-
-  /////////////////////////////////////////////
-  ///////////////////  杂项  ///////////////////
-  /////////////////////////////////////////////
-
-
 
 })(window);
