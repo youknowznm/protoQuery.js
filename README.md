@@ -1,7 +1,8 @@
 # zQuery
 
 ###
-jQuery在几乎未触及任何原生JavaScript对象原型的基础上实现了对节点实例的选择和操作，实在是屌。我才疏学浅，尝试通过在全局变量和JS基本类型和节点的原型添加若干方法和变量，实现jQuery的若干常用接口。
+jQuery在几乎未触及任何原生JavaScript对象原型的基础上实现了对节点实例的选择和操作。我才疏学浅，尝试通过在全局变量上、JS基本类型和节点的原型上添加若干方法和属性，实现jQuery的若干常用接口。还在完善中。
+
 实现顺序基于[jQuery Learning Center](http://learn.jquery.com)中api出现的顺序。
 
 # API
@@ -55,15 +56,10 @@ jQuery在几乎未触及任何原生JavaScript对象原型的基础上实现了�
 - `Node.on(obj)` -> `{node}`
 - `Node.on(events, function)` -> `{node}`
 - `Node.on(events, delegationSelector, function)` -> `{node}`
-  * 添加事件监听
-    － 1 键：单一或多个事件名；值：该事件的监听函数
-    － 2 events：单一或多个事件名；function：对应的监听函数
-    － 3 events：单一或多个事件名；delegationSelector：被代理元素的选择字符串；function：监听函数
+  * 直接添加或代理事件监听
 - `Node.off(obj)` -> `{node}`
 - `Node.off(events, function)` -> `{node}`
   * 移除事件监听
-    － 1 键：单一或多个事件名；值：该事件的监听函数
-    － 2 events：单一或多个事件名；function：对应的监听函数
 
 ###
 *遍历*
@@ -109,7 +105,9 @@ jQuery在几乎未触及任何原生JavaScript对象原型的基础上实现了�
   * 复制原始类型值或一般对象
 - `Window.uniq(arr)` -> `{array}`
   * 返回去重的新数组（限定为基本类型值组成），原数组未改动
-- `Window.cookie(cookieName, cookieValue?)` -> `{string|undefined}`
+- `Window.cookie(cookieName)` -> `{string}`
+- `Window.cookie(cookieName, cookieValue)` -> `{undefined}`
+- `Window.cookie(cookieName, cookieValue, expireDays)` -> `{undefined}`
   * 读写cookie或修改有效期
 - `Window.ajax(url, options)` -> `{undefined}`
   * 简易的ajax方法，可发送键值对象或查询字符串作为数据
