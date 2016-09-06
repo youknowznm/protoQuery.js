@@ -250,22 +250,32 @@
     return result;
   };
 
-  // todo
+  // 读写cookie
+  //  1 arg
+  //  @param {string} arg1 目标cookie名
+  //  @return {string} cookie值或空字符串
+  //  2 arg
+  //  @param {string} arg1 目标cookie名
+  //  @param {string} arg2 目标cookie值
+  //  3 arg
+  //  @param {string} arg1 目标cookie名
+  //  @param {string} arg2 目标cookie值
+  //  @param {number} arg3 有效天数
   globalEnv.cookie = function(arg1, arg2, ar3) {
-    var cookieArr = document.cookie.split(/;\s*/);
-    var cookieObj = {};
-    for (var i in cookieArr) {
-      // cookieObj.
-    }
     switch (arguments.length) {
       case 1:
         if (typeof arg1 !== 'string') {
           throw new Error('Expected STRING as target cookie name.');
         }
-        var result = cookieArr.filter(function(item, index, arr){
-          return item.test()
-        })
-        break;
+        var cookieStr = document.cookie;
+        var start = cookieStr.indexOf(encodeURIComponent(arg1) + '=');
+        if (start !== -1) {
+          var semicolonPos = cookieStr.indexOf(';', start);
+          var end = semicolonPos === -1 ? cookieStr.length : semicolonPos;
+          var rawCookieValue = cookieStr.slice(start, end).match(/=(.*)/)[1];
+          return decodeURIComponent(rawCookieValue);
+        }
+        return '';
       default:
         if (typeof arg1 !== 'string') {
           throw new Error('Expected STRING as target cookie name.');
@@ -279,16 +289,18 @@
             throw new Error('Expected NUMBER as expire day (if provided).');
           }
           var expireDate = new Date();
-          expireDate.setDate(expireDate.getDate() + expireDays);
+          expireDate.setDate(expireDate.getDate() + ar3);
           cookieText = cookieText + '; expires=' + expireDate.toUTCString();
         }
+        document.cookie = cookieText;
     }
-    document.cookie = cookieText;
   };
 
-  // todo
+  // 简易ajax方法
+  // @param {string} url 目标url
+  // @param {object} options 选项对象，应包含发送类型、数据（对象或查询字符串）、成功函数和失败函数
   globalEnv.ajax = function(url, options) {
-    var type = options.type === undefined ? 'post' : options.type;
+    var type = options.type === undefined ? 'GET' : options.type;
     var data;
     switch (typeof options.data) {
       case 'string':
@@ -304,24 +316,34 @@
       default:
         throw new Error('Expected STRING or OBJECT as data to send.');
     }
-    var onDone = typeof options.onDone === 'function' ? options.onDone : function() {
-      alert('Your XHR was done. (' + this.status + ')');
+    var onDone = typeof options.onDone === 'function' ? options.onDone : function(resText) {
+      alert('Your XHR was done. \nThis appears because a SUCCESS listener wasn\'t provided. '
+            + '\nResponse Text: \n' + resText);
     };
-    var onFail = typeof options.onFail === 'function' ? options.onFail : function() {
-      alert('Your XHR failed. (' + this.status + ')');
+    var onFail = typeof options.onFail === 'function' ? options.onFail : function(status) {
+      alert('Your XHR failed. \nThis appears because a FAIL listener wasn\'t provided. '
+            + '\nStatus Code:' + status);
     };
     var xhr = new XMLHttpRequest();
-    xhr.open(type, url, true);
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
-          onDone();
+          onDone(xhr.responseText);
         } else {
-          onFail();
+          onFail(xhr.status);
         }
       }
+    };
+    switch (type.toUpperCase()) {
+      case 'GET':
+        xhr.open('GET', url + '?' + data, true);
+        xhr.send();
+        break;
+      case 'POST':
+        xhr.open('POST', url, true);
+        xhr.send(data);
+        break;
     }
-    xhr.send(data);
   };
 
   /////////////////////////////////////////////

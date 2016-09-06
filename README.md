@@ -1,7 +1,8 @@
 # zQuery
 
 ###
-jQuery在几乎未触及任何原生JavaScript对象原型的基础上实现了对节点实例的选择和操作，实在是屌。我才疏学浅，尝试通过在Node实例和JS基本类型的原型以及全局变量上添加若干方法和变量，实现jQuery的若干常用接口。实现顺序基于[jQuery Learning Center](http://learn.jquery.com)中api出现的顺序。
+jQuery在几乎未触及任何原生JavaScript对象原型的基础上实现了对节点实例的选择和操作，实在是屌。我才疏学浅，尝试通过在全局变量和JS基本类型和节点的原型添加若干方法和变量，实现jQuery的若干常用接口。
+实现顺序基于[jQuery Learning Center](http://learn.jquery.com)中api出现的顺序。
 
 # API
 
@@ -34,7 +35,7 @@ jQuery在几乎未触及任何原生JavaScript对象原型的基础上实现了�
   * 返回元素相对于浏览器窗口之坐标
 - `Node.width(tarValue?)` -> `{node}`
 - `Node.height(tarValue?)` -> `{node}`
-  * todo
+  * 读写元素的宽高
 - `Node.transform(styleObj, callback)` -> `{node}`
   * 渐变目标的一个或多个样式，可提供回调函数
 - `Node.show(option?)` -> `{node}`
@@ -108,7 +109,7 @@ jQuery在几乎未触及任何原生JavaScript对象原型的基础上实现了�
   * 复制原始类型值或一般对象
 - `Window.uniq(arr)` -> `{array}`
   * 返回去重的新数组（限定为基本类型值组成），原数组未改动
-- `Window.cookie()` -> `{}`
-  * todo
-- `Window.ajax()` -> `{}`
-  * todo
+- `Window.cookie(cookieName, cookieValue?)` -> `{string|undefined}`
+  * 读写cookie或修改有效期
+- `Window.ajax(url, options)` -> `{undefined}`
+  * 简易的ajax方法，可发送键值对象或查询字符串作为数据
