@@ -5,7 +5,7 @@
 
   var zQueryUtil = (function(){
     return {
-      onGoingAnimations: []
+      onGoingAnimations: {}
     };
   })();
 
@@ -152,6 +152,7 @@
   // @param {node} ele 目标元素
   // @param {string} tarStyle 目标样式名
   // @param {string} tarValue 目标样式值
+  // @return {number} cycleId 动画标识id
   var changeSingleRuleGradiently = function(ele, tarStyle, tarValue) {
     var fullStyleValue = ele.css(tarStyle);
     var currentValue = parseFloat(fullStyleValue);
@@ -162,7 +163,9 @@
     if (!isFinite(currentValue)) {
       throw new Error('Expected a number-type style value.');
     }
-    var styleSuffix = fullStyleValue.match(/^\d+(.*)$/)[1] || '';
+    console.log(fullStyleValue);
+    // #02 忽略了负值的情况
+    var styleSuffix = fullStyleValue.match(/^[-\d]+(.*)$/)[1] || '';
     var cycleId = setInterval(function(){
       switch (true) {
         case currentValue < tarValue:
@@ -172,7 +175,7 @@
           currentValue -= Math.ceil((currentValue - tarValue) / 10);
           break;
         default:
-          zQueryUtil.onGoingAnimations.splice(zQueryUtil.onGoingAnimations.indexOf(cycleId), 1);
+          zQueryUtil.onGoingAnimations[cycleId] = true;
           clearInterval(cycleId);
       }
       if (FLOAT_TYPE_STYLE_NAMES.indexOf(tarStyle) !== -1) {
@@ -181,7 +184,8 @@
         ele.css(tarStyle, currentValue + styleSuffix);
       }
     }, 20);
-    zQueryUtil.onGoingAnimations.push(cycleId);
+    zQueryUtil.onGoingAnimations[cycleId] = false;
+    return cycleId;
   };
 
   /////////////////////////////////////////////
@@ -452,15 +456,20 @@
       if (typeof styleObj !== 'object') {
         throw new Error('Expected PLAIN OBJECT containing style key-value pairs.');
       }
+      var animationIdGruop = [];
       for (var i in styleObj) {
-        changeSingleRuleGradiently(this, i, styleObj[i]);
+        var id = changeSingleRuleGradiently(this, i, styleObj[i]);
+        animationIdGruop.push(id);
       }
       if (typeof callback === 'function') {
-        var id = setInterval(function(){
-          if (zQueryUtil.onGoingAnimations[0] === undefined) {
-            clearInterval(id);
-            callback();
+        var callbackId = setInterval(function(){
+          for (var j in animationIdGruop) {
+            if (zQueryUtil.onGoingAnimations[animationIdGruop[j]] === false) {
+              return;
+            }
           }
+          clearInterval(callbackId);
+          callback();
         }, 10);
       }
       return this;
