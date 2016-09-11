@@ -529,6 +529,34 @@
       return nodeMatchesSelector(this, selector);
     };
 
+    // 在当前元素的第一个子元素前插入目标元素
+    // @return {node} 插入的新元素节点
+    nodePrototype.prependChild = function(tarNode) {
+      if (tarNode.nodeType !== 1) {
+        throw new Error('Expected ELEMENT NODE as target node.')
+      }
+      this.insertBefore(tarNode, this.firstElementChild);
+      return tarNode;
+    };
+
+    // @param {node} newNode 新元素节点
+    // @param {node} referenceNode 比照元素节点
+    // @return {node} 插入的新元素节点
+    nodePrototype.insertAfter = function(newNode, referenceNode) {
+      if (newNode.nodeType !== 1) {
+        throw new Error('Expected ELEMENT NODE as target node.')
+      }
+      if (referenceNode.nodeType !== 1) {
+        throw new Error('Expected ELEMENT NODE as reference node.')
+      }
+      if (this.lastElementChild === referenceNode) {
+        this.appendChild(newNode);
+      } else {
+        this.insertBefore(newNode, referenceNode.nextElementSibling);
+      }
+      return newNode;
+    };
+
     // 返回目标元素的直接父元素
     // @return {node} 元素节点或null
     nodePrototype.parent = function() {
