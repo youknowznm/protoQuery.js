@@ -153,7 +153,7 @@
   // @param {string} tarStyle 目标样式名
   // @param {string} tarValue 目标样式值
   // @return {number} cycleId 动画标识id
-  var changeSingleRuleGradiently = function(ele, tarStyle, tarValue) {
+  var transformSingleRule = function(ele, tarStyle, tarValue) {
     var fullStyleValue = ele.css(tarStyle);
     var currentValue = parseFloat(fullStyleValue);
     if (FLOAT_TYPE_STYLE_NAMES.indexOf(tarStyle) !== -1) {
@@ -163,7 +163,6 @@
     if (!isFinite(currentValue)) {
       throw new Error('Expected a number-type style value.');
     }
-    console.log(fullStyleValue);
     // #02 忽略了负值的情况
     var styleSuffix = fullStyleValue.match(/^[-\d]+(.*)$/)[1] || '';
     var cycleId = setInterval(function(){
@@ -426,7 +425,9 @@
         case 1:
           switch (typeof arg1) {
             case 'string':
-              return document.defaultView.getComputedStyle(this, null)[arg1] || null;
+              // #03 对值为auto的样式，似乎chrome懂事儿地返回了0px，safari返回auto。
+              var rawResult = document.defaultView.getComputedStyle(this, null)[arg1] || null;
+              return rawResult === 'auto' ? '0px' : rawResult;
             case 'object':
               for (var i in arg1) {
                 changeSingleRule.call(this, i, arg1[i]);
@@ -458,7 +459,7 @@
       }
       var animationIdGruop = [];
       for (var i in styleObj) {
-        var id = changeSingleRuleGradiently(this, i, styleObj[i]);
+        var id = transformSingleRule(this, i, styleObj[i]);
         animationIdGruop.push(id);
       }
       if (typeof callback === 'function') {
