@@ -207,6 +207,26 @@
     }
   };
 
+  // 判断目标对象是否为空对象（不是null）
+  // @param {object} target 目标对象
+  // @param {boolean?} shoudlIncludeInherited 为真时，考虑继承来的属性
+  globalEnv.isEmpty = function(target, shoudlIncludeInherited){
+    switch (shoudlIncludeInherited) {
+      case true:
+        for (var anyKey in target) {
+          return false;
+        }
+        return true;
+      default:
+        for (var anyKey in target) {
+          if (target.hasOwnProperty(anyKey)) {
+            return false;
+          }
+        }
+        return true;
+    }
+  };
+
   // 复制原始类型值或一般对象
   globalEnv.clone = function(source) {
     var result;
@@ -274,7 +294,9 @@
         var start = cookieStr.indexOf(encodeURIComponent(arg1) + '=');
         if (start !== -1) {
           var semicolonPos = cookieStr.indexOf(';', start);
-          var end = semicolonPos === -1 ? cookieStr.length : semicolonPos;
+          var end = semicolonPos === -1
+            ? cookieStr.length
+            : semicolonPos;
           var rawCookieValue = cookieStr.slice(start, end).match(/=(.*)/)[1];
           return decodeURIComponent(rawCookieValue);
         }
@@ -303,7 +325,9 @@
   // @param {string} url 目标url
   // @param {object} options 选项对象，应包含发送类型、数据（对象或查询字符串）、成功函数和失败函数
   globalEnv.ajax = function(url, options) {
-    var type = options.type === undefined ? 'GET' : options.type;
+    var type = options.type === undefined
+      ? 'GET'
+      : options.type;
     var data;
     switch (typeof options.data) {
       case 'string':
@@ -319,14 +343,18 @@
       default:
         throw new Error('Expected STRING or OBJECT as data to send.');
     }
-    var onDone = typeof options.onDone === 'function' ? options.onDone : function(resText) {
-      alert('Your XHR was done. \nThis appears because a SUCCESS listener wasn\'t provided. '
-            + '\nResponse Text: \n' + resText);
-    };
-    var onFail = typeof options.onFail === 'function' ? options.onFail : function(status) {
-      alert('Your XHR failed. \nThis appears because a FAIL listener wasn\'t provided. '
-            + '\nStatus Code:' + status);
-    };
+    var onDone = typeof options.onDone === 'function'
+      ? options.onDone
+      : function(resText) {
+        alert('Your XHR was done. \nThis appears because a SUCCESS listener wasn\'t provided. '
+              + '\nResponse Text: \n' + resText);
+            };
+    var onFail = typeof options.onFail === 'function'
+      ? options.onFail
+      : function(status) {
+        alert('Your XHR failed. \nThis appears because a FAIL listener wasn\'t provided. '
+              + '\nStatus Code:' + status);
+            };
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4) {
@@ -427,7 +455,9 @@
             case 'string':
               // #03 对值为auto的样式，似乎chrome懂事儿地返回了0px，safari返回auto。
               var rawResult = document.defaultView.getComputedStyle(this, null)[arg1] || null;
-              return rawResult === 'auto' ? '0px' : rawResult;
+              return rawResult === 'auto'
+                ? '0px'
+                : rawResult;
             case 'object':
               for (var i in arg1) {
                 changeSingleRule.call(this, i, arg1[i]);

@@ -109,6 +109,8 @@ jQuery在几乎未触及任何原生JavaScript对象原型的基础上实现了�
   * 复制原始类型值或一般对象
 - `Window.uniq(arr)` -> `{array}`
   * 返回去重的新数组（限定为基本类型值组成），原数组未改动
+- `Window.isEmpty(target, shoudlIncludeInherited)` -> `{boolean}`
+  * 判断目标是否为空对象，第二参数为真时，考虑从原型继承来的属性
 - `Window.cookie(cookieName)` -> `{string}`
 - `Window.cookie(cookieName, cookieValue)` -> `{undefined}`
 - `Window.cookie(cookieName, cookieValue, expireDays)` -> `{undefined}`
