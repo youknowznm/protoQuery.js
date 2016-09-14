@@ -1,9 +1,9 @@
-(function(globalEnv){
+(function(globalEnv) {
 
   var NUMBER_TYPE_STYLE_NAMES = ['opacity'];
   var FLOAT_TYPE_STYLE_NAMES = ['opacity'];
 
-  var zQueryUtil = (function(){
+  var zQueryUtil = (function() {
     return {
       onGoingAnimations: {}
     };
@@ -122,8 +122,8 @@
     switch (options.method) {
       case 'add':
         if (options.delegationSelector !== undefined) {
-          handleEachEvent = function(evtName){
-            ele.addEventListener(evtName, function(evtObj){
+          handleEachEvent = function(evtName) {
+            ele.addEventListener(evtName, function(evtObj) {
               var tar = evtObj.target;
               if (tar.is(options.delegationSelector)) {
                 fn.call(this, evtObj);
@@ -165,7 +165,7 @@
     }
     // #02 忽略了负值的情况
     var styleSuffix = fullStyleValue.match(/^[-\d]+(.*)$/)[1] || '';
-    var cycleId = setInterval(function(){
+    var cycleId = setInterval(function() {
       switch (true) {
         case currentValue < tarValue:
           currentValue += Math.ceil((tarValue - currentValue) / 10);
@@ -200,7 +200,7 @@
 
   // 在文档渲染结束、即将加载内嵌资源时，执行指定函数
   globalEnv.domReady = function(fn) {
-    document.onreadystatechange = function(){
+    document.onreadystatechange = function() {
       if (document.readyState === 'interactive') {
         fn();
       }
@@ -210,7 +210,7 @@
   // 判断目标对象是否为空对象（不是null）
   // @param {object} target 目标对象
   // @param {boolean?} shoudlIncludeInherited 为真时，考虑继承来的属性
-  globalEnv.isEmpty = function(target, shoudlIncludeInherited){
+  globalEnv.isEmpty = function(target, shoudlIncludeInherited) {
     switch (shoudlIncludeInherited) {
       case true:
         for (var anyKey in target) {
@@ -493,7 +493,7 @@
         animationIdGruop.push(id);
       }
       if (typeof callback === 'function') {
-        var callbackId = setInterval(function(){
+        var callbackId = setInterval(function() {
           for (var j in animationIdGruop) {
             if (zQueryUtil.onGoingAnimations[animationIdGruop[j]] === false) {
               return;
@@ -895,7 +895,7 @@
     nodePrototype.fadeOut = function() {
       if (this.css('display') !== 'none') {
         var that = this;
-        this.transform({'opacity': 0}, function(){
+        this.transform({'opacity': 0}, function() {
           that.hide();
         });
       }
@@ -918,7 +918,7 @@
     nodePrototype.slideUp = function() {
       if (this.css('display') !== 'none') {
         var that = this;
-        this.transform({'height': 0}, function(){
+        this.transform({'height': 0}, function() {
           that.hide();
         });
       }
@@ -940,7 +940,7 @@
 
     // 判断字符串是否符合常见邮箱格式
     stringPrototype.isEmail = function() {
-      return /^([a-zA-Z\d]+)\w@(\w+)(\.[a-zA-Z]{2,}){1,2}$/.test(this);
+      return /^([a-zA-Z\d]+)\w@(\w+)(\.[a-zA-Z]{2,}) {1,2}$/.test(this);
     };
 
     // 判断字符串是否符合中国手机号码
