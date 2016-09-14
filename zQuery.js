@@ -207,6 +207,16 @@
     }
   };
 
+  // 浏览器为移动端时设置全局变量isMobile为真，否则为假；并返回该值
+  globalEnv.detectMobile = function() {
+    var ua = globalEnv.navigator.userAgent;
+    var result = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Mobile|UCWeb/i.test(ua)
+      ? true
+      : false;
+    globalEnv.isMobile = result;
+    return result;
+  };
+
   // 判断目标对象是否为空对象（不是null）
   // @param {object} target 目标对象
   // @param {boolean?} shoudlIncludeInherited 为真时，考虑继承来的属性
