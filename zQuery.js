@@ -511,7 +511,7 @@
           }
           clearInterval(callbackId);
           callback();
-        }, 10);
+        }, 5);
       }
       return this;
     };
@@ -534,7 +534,7 @@
         posParent = posParent.offsetParent;
       }
       return {top, left};
-    }
+    };
 
     // 获取或设置目标属性
     // @param {string} tarAttr 目标属性名
@@ -554,6 +554,15 @@
           return this;
         }
       }
+    };
+
+    // 获取或设置目标的innerHTML
+    nodePrototype.html = function(tarHTML) {
+      if (tarHTML === undefined) {
+        return this.innerHTML;
+      }
+      this.innerHTML = tarHTML;
+      return this;
     };
 
     ///////////////  选择和遍历  ///////////////
