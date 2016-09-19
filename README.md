@@ -98,11 +98,9 @@ jQuery在几乎未触及任何原生JavaScript对象原型的基础上实现了�
 *字符串处理*
 - `String.trim()` -> `{string}`
   * 去除字符串首尾的空格
-- `String.isEmail()` -> `{string}`
+- `String.isEmail()` -> `{boolean}`
   * 判断字符串是否符合常见邮箱格式
-- `String.isEmail()` -> `{string}`
-  * 判断字符串是否符合中国手机号码
-- `String.isValidDate()` -> `{string}`
+- `String.isValidDate()` -> `{boolean}`
   * 判断字符串是否为有效日期，无法判断闰年
 
 ###
