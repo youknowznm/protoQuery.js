@@ -962,11 +962,6 @@
       return /^([a-zA-Z\d]+)\w@(\w+)(\.[a-zA-Z]{2,}) {1,2}$/.test(this);
     };
 
-    // 判断字符串是否符合中国手机号码
-    stringPrototype.isEmail = function() {
-      return /^1\d{10}$/.test(this);
-    };
-
     // 判断字符串是否为有效日期，无法判断闰年
     stringPrototype.isValidDate = function() {
       if ((/^([012]\d\d\d)-(([01]\d)-([0123]\d))$/).test(this)) {
