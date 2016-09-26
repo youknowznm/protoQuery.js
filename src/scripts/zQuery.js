@@ -1,4 +1,4 @@
-((wd) => {
+(function(wd) {
 
   const NUMBER_TYPE_STYLE_NAMES = ['opacity'];
   const FLOAT_TYPE_STYLE_NAMES = ['opacity'];
@@ -10,22 +10,25 @@
   /////////////////  基本方法  /////////////////
   /////////////////////////////////////////////
 
-  // 判断单个节点是否含目标类
-  const nodeHasClass = (tarNode, tarClass) => {
-    if (!tarNode.nodeName !== 1) {
-      throw new Error('Expected ELEMENT NODE as target node.');
-    }
-    if (typeof tarClassName !== 'string') {
-      throw new Error('Expected STRING as target class name.');
-    }
-    const classArr = tarClass.className.split(/\s+/);
-    if (classArr[0] !== '') {
-      if (classArr.indexOf(tarClassName) > -1) {
-        return true;
-      }
-    }
-    return false;
-  };
+  // // 判断单个节点是否含目标类
+  // const nodeHasClass = (tarNode, tarClass) => {
+  //   if (tarNode === undefined) {
+  //     return false;
+  //   }
+  //   if (!tarNode.nodeName !== 1) {
+  //     throw new Error('Expected ELEMENT NODE as target node.');
+  //   }
+  //   if (typeof tarClassName !== 'string') {
+  //     throw new Error('Expected STRING as target class name.');
+  //   }
+  //   const classArr = tarClass.className.split(/\s+/);
+  //   if (classArr[0] !== '') {
+  //     if (classArr.indexOf(tarClassName) > -1) {
+  //       return true;
+  //     }
+  //   }
+  //   return false;
+  // };
 
   // 判断单个节点是否符合单个选择器
   const nodeMatchesSelector = (tarNode, selector) => {
@@ -45,7 +48,7 @@
         let thisNodeMatches = false;
         for (const tarClass of tarClasses) {
           thisNodeMatches = true;
-          if (!nodeHasClass(tarNode, tarClass)) {
+          if (!tarNode.hasClass(tarClass)) {
             thisNodeMatches = false;
             break;
           }
@@ -392,9 +395,9 @@
         reject(xhr.status);
       }
     });
-    (async function() {
-      await xhrPromise;
-    })();
+    // (async function () => {
+    //   await xhrPromise;
+    // })();
     switch (type.toUpperCase()) {
       case 'GET':
         xhr.open('GET', url + '?' + data, true);
@@ -415,13 +418,21 @@
 
     ///////////////  样式和属性  ///////////////
 
-    // 元素含指定类名时返回真
-    nodePrototype.hasClass = (tarClassName) => {
-      return nodeHasClass(this, tarClassName);
+    nodePrototype.hasClass = function(tarClassName) {
+      if (typeof tarClassName !== 'string') {
+        throw new Error('Expected STRING as target class name.');
+      }
+      var classArr = this.className.split(/\s+/);
+      if (classArr[0] !== '') {
+        if (classArr.indexOf(tarClassName) !== -1) {
+          return true;
+        }
+      }
+      return false;
     };
 
     // 为目标元素添加指定类
-    nodePrototype.addClass = (tarClassName) => {
+    nodePrototype.addClass = function(tarClassName) {
       if (typeof tarClassName !== 'string') {
         throw new Error('Expected STRING as target class name.');
       }
@@ -432,7 +443,7 @@
     };
 
     // 为目标元素移除指定类
-    nodePrototype.removeClass = (tarClassName) => {
+    nodePrototype.removeClass = function(tarClassName) {
       if (typeof tarClassName !== 'string') {
         throw new Error('Expected STRING as target class name.');
       }
@@ -445,7 +456,7 @@
     };
 
     // 目标元素含指定类时移除，否则添加
-    nodePrototype.toggleClass = (tarClassName) => {
+    nodePrototype.toggleClass = function(tarClassName) {
       if (typeof tarClassName !== 'string') {
         throw new Error('Expected STRING as target class name.');
       }
@@ -461,7 +472,7 @@
     // @param {string|object} arg1 只提供此参数：为数值时返回该样式值；为对象时设置元素的多条规则
     // @param {string|number?} arg2 提供时设置指定样式的值
     // @return {node|string|null} 读取时返回字符串或null；设置时返回自身
-    nodePrototype.css = (arg1, arg2) => {
+    nodePrototype.css = function(arg1, arg2) {
       const changeSingleRule = (name, value) => {
         if (/^.*\d$/.test(value) && NUMBER_TYPE_STYLE_NAMES.indexOf(name) === -1) {
           value += 'px';
@@ -480,8 +491,8 @@
                 ? '0px'
                 : rawResult;
             case 'object':
-              for (var rule of arg1) {
-                changeSingleRule.call(this, i, rule);
+              for (var i in arg1) {
+                changeSingleRule.call(this, i, arg1[i]);
               }
               return this;
             default:
@@ -581,12 +592,12 @@
     // 根据组合选择器字符串查询，返回元素下所有符合的元素
     // @param {string} selectorGroup "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式以空格连接的查询字符串
     // @return {array.<node>} 返回成员类型为node的数组或空数组
-    nodePrototype.query = (selectorGroup) => {
+    nodePrototype.query = function(selectorGroup) {
       return groupSelectorAllResults(selectorGroup, this);
     };
 
     // 目标元素本身符合字符串时返回真
-    nodePrototype.is = (selector) => {
+    nodePrototype.is = function(selector) {
       return nodeMatchesSelector(this, selector);
     };
 
@@ -621,7 +632,7 @@
     // 返回目标元素的直接父元素
     // @return {node} 元素节点或null
     nodePrototype.parent = function() {
-      var tarElement = this.parentNode;
+      let tarElement = this.parentNode;
       while (true) {
         if (tarElement === null || tarElement.nodeType === 1) {
           return tarElement;
@@ -634,8 +645,8 @@
     // 返回目标元素的所有符合参数条件的父元素
     // @return {array.<node>} 元素节点对象构成之数组
     nodePrototype.matchedParents = function(selector) {
-      var result = [];
-      var currentNode = this.parent();
+      let result = [];
+      let currentNode = this.parent();
       while (currentNode !== null) {
         if (nodeMatchesSelector(currentNode, selector)) {
           result.push(currentNode);
@@ -648,8 +659,8 @@
     // 返回目标元素的不符合参数条件的所有父元素
     // @return {array.<node>} 元素节点对象构成之数组
     nodePrototype.parentsUntil = function(selector) {
-      var result = [];
-      var currentNode = this.parent();
+      let result = [];
+      let currentNode = this.parent();
       while (currentNode !== null) {
         if (!nodeMatchesSelector(currentNode, selector)) {
           result.push(currentNode);
@@ -664,7 +675,7 @@
     // 返回目标元素的符合参数条件的最近的父元素，遍历包含元素自身
     // @return {node} 元素节点或null
     nodePrototype.closest = function(selector) {
-      var currentNode = this;
+      let currentNode = this;
       while (currentNode !== null) {
         if (nodeMatchesSelector(currentNode, selector)) {
           return currentNode;
@@ -678,13 +689,11 @@
     // 返回目标元素的符合参数条件的直接子元素
     // @return {array.<node>} 元素节点对象构成之数组
     nodePrototype.matchedChildren = function(selector) {
-      var result = [];
-      var directChildNodes = this.childNodes;
-      var currentNode;
-      for (var i in directChildNodes) {
-        currentNode = directChildNodes[i];
-        if (currentNode.nodeType === 1 && nodeMatchesSelector(currentNode, selector)) {
-          result.push(currentNode);
+      let result = [];
+      const directChildNodes = this.childNodes;
+      for (var child of directChildNodes) {
+        if (child.nodeType === 1 && nodeMatchesSelector(child, selector)) {
+          result.push(child);
         }
       }
       return result;
