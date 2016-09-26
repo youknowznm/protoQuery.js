@@ -1,20 +1,34 @@
-(function(globalEnv) {
+((wd) => {
 
-  var NUMBER_TYPE_STYLE_NAMES = ['opacity'];
-  var FLOAT_TYPE_STYLE_NAMES = ['opacity'];
-
-  var zQueryUtil = (function() {
-    return {
-      onGoingAnimations: {}
-    };
-  })();
+  const NUMBER_TYPE_STYLE_NAMES = ['opacity'];
+  const FLOAT_TYPE_STYLE_NAMES = ['opacity'];
+  let zQueryUtil = {
+      onGoingAnimations: {},
+  };
 
   /////////////////////////////////////////////
   /////////////////  基本方法  /////////////////
   /////////////////////////////////////////////
 
+  // 判断单个节点是否含目标类
+  const nodeHasClass = (tarNode, tarClass) => {
+    if (!tarNode.nodeName !== 1) {
+      throw new Error('Expected ELEMENT NODE as target node.');
+    }
+    if (typeof tarClassName !== 'string') {
+      throw new Error('Expected STRING as target class name.');
+    }
+    const classArr = tarClass.className.split(/\s+/);
+    if (classArr[0] !== '') {
+      if (classArr.indexOf(tarClassName) !== -1) {
+        return true;
+      }
+    }
+    return false;
+  };
+
   // 判断单个节点是否符合单个选择器
-  nodeMatchesSelector = function(tarNode, selector) {
+  const nodeMatchesSelector = (tarNode, selector) => {
     if (!tarNode instanceof Node) {
       throw new Error('Expected NODE as target node.');
     }
@@ -27,11 +41,11 @@
         return tarNode.id === RegExp.$1;
       // 类选择器，支持多个类
       case /^\.([\w-\.]+)$/.test(selector):
-        var tarClasses = RegExp.$1.split('.');
-        var thisNodeMatches;
-        for (var i in tarClasses) {
+        const tarClasses = RegExp.$1.split('.');
+        let thisNodeMatches = false;
+        for (var tarClass of tarClasses) {
           thisNodeMatches = true;
-          if (!tarNode.hasClass(tarClasses[i])) {
+          if (!nodeHasClass(tarNode, tarClass)) {
             thisNodeMatches = false;
             break;
           }
@@ -58,17 +72,17 @@
   // @param {string} selector "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式的［单个］查询字符串
   // @param {node?} root 提供时以其为遍历起点，否则以document为起点
   // @return {array.<node>} 返回成员类型为node的数组或空数组
-  var singleSelectorAllResults = function(selector, root) {
+  const singleSelectorAllResults = (selector, root) => {
     if (root === undefined) {
       return [];
     }
-    var result = [];
+    let result = [];
     // #01 TreeWalker实例在遍历时并不会计算根节点，因此在这里添加对根节点的判定
     if (nodeMatchesSelector(root, selector)) {
       result.push(root);
     }
-    var walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, null, false);
-    var currentNode = walker.nextNode();
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, null, false);
+    let currentNode = walker.nextNode();
     while (currentNode !== null) {
       if (nodeMatchesSelector(currentNode, selector)) {
         result.push(currentNode);
@@ -81,8 +95,8 @@
   // 根据［组合］选择器字符串查询，返回目标元素下［所有］符合的元素
   // @param {string} selectorGroup "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式以空格连接的查询字符串
   // @return {array.<node>} 返回成员类型为node的数组或空数组
-  var groupSelectorAllResults = function(selectorGroup, root) {
-    var selectorArr = selectorGroup.split(' ');
+  const groupSelectorAllResults = (selectorGroup, root) => {
+    const selectorArr = selectorGroup.split(' ');
     switch (selectorArr.length) {
       case 1:
         return singleSelectorAllResults(selectorArr[0], root);
@@ -99,7 +113,7 @@
         var r3 = singleSelectorAllResults(selectorArr[2], r2)[0];
         return singleSelectorAllResults(selectorArr[3], r3);
       default:
-        throw new Error('Expected at most 4 selector snippets.')
+        throw new Error('Expected at most 4 selector snippets.');
     }
   };
 
@@ -108,7 +122,7 @@
   // @param {string} evts 单一或多个目标事件
   // @param {function} fn 监听函数
   // @param {object} options 'method'为'add'或'remove'；提供'delegationSelector'时代理监听
-  var handleSingleListener = function(ele, evts, fn, options) {
+  const handleSingleListener = (ele, evts, fn, options) => {
     if (ele.nodeType !== 1) {
       throw new Error('Expected ELEMENT NODE as target.')
     }
@@ -118,33 +132,36 @@
     if (typeof fn !== 'function') {
       throw new Error('Expected FUNCTION as event listener.')
     }
-    var handleEachEvent = null;
+    let handleEachEvent = null;
     switch (options.method) {
       case 'add':
         if (options.delegationSelector !== undefined) {
-          handleEachEvent = function(evtName) {
-            ele.addEventListener(evtName, function(evtObj) {
-              var tar = evtObj.target;
-              if (tar.is(options.delegationSelector)) {
-                fn.call(this, evtObj);
-              }
-            }, false);
+          handleEachEvent = (evtName) => {
+            ele.addEventListener(
+              evtName,
+              function(evtObj) {
+                if (evtObj.target.is(options.delegationSelector)) {
+                  fn.call(this, evtObj);
+                }
+              },
+              false
+            );
           };
         } else {
-          handleEachEvent = function(evtName) {
+          handleEachEvent = (evtName) => {
             ele.addEventListener(evtName, fn, false);
           };
         }
         break;
       case 'remove':
-        handleEachEvent = function(evtName) {
+        handleEachEvent = (evtName) => {
           ele.removeEventListener(evtName, fn, false);
         };
         break;
     }
-    var evts = evts.split(/\s/);
-    for (var i in evts) {
-      handleEachEvent(evts[i]);
+    const targetEvents = evts.split(/\s/);
+    for (var evt of targetEvents) {
+      handleEachEvent(evt);
     }
   };
 
@@ -153,18 +170,18 @@
   // @param {string} tarStyle 目标样式名
   // @param {string} tarValue 目标样式值
   // @return {number} cycleId 动画标识id
-  var transformSingleRule = function(ele, tarStyle, tarValue) {
-    var fullStyleValue = ele.css(tarStyle);
-    var currentValue = parseFloat(fullStyleValue);
+  const transformSingleRule = (ele, tarStyle, tarValue) => {
+    const fullStyleValue = ele.css(tarStyle);
+    const currentValue = parseFloat(fullStyleValue);
+    if (!isFinite(currentValue)) {
+      throw new Error('Expected a number-type style value.');
+    }
     if (FLOAT_TYPE_STYLE_NAMES.indexOf(tarStyle) !== -1) {
       currentValue *= 100;
       tarValue *= 100;
     }
-    if (!isFinite(currentValue)) {
-      throw new Error('Expected a number-type style value.');
-    }
-    // #02 忽略了负值的情况
-    var styleSuffix = fullStyleValue.match(/^[-\d]+(.*)$/)[1] || '';
+    // #02 开始忽略了负值的情况
+    const styleSuffix = fullStyleValue.match(/^[-\d]+(.*)$/)[1] || '';
     var cycleId = setInterval(function() {
       switch (true) {
         case currentValue < tarValue:
@@ -194,12 +211,12 @@
   // 根据组合选择器字符串查询，返回文档内所有符合的元素
   // @param {string} selectorGroup "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式以空格连接的查询字符串
   // @return {array.<node>} 返回成员类型为node的数组或空数组
-  globalEnv.query = function(selectorGroup) {
+  wd.query = function(selectorGroup) {
     return groupSelectorAllResults(selectorGroup, document.documentElement);
   };
 
   // 在文档渲染结束、即将加载内嵌资源时，执行指定函数
-  globalEnv.domReady = function(fn) {
+  wd.domReady = function(fn) {
     document.onreadystatechange = function() {
       if (document.readyState === 'interactive') {
         fn();
@@ -208,19 +225,19 @@
   };
 
   // 浏览器为移动端时设置全局变量isMobile为真，否则为假；并返回该值
-  globalEnv.detectMobile = function() {
-    var ua = globalEnv.navigator.userAgent;
+  wd.detectMobile = function() {
+    var ua = wd.navigator.userAgent;
     var result = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Windows Mobile|UCWeb/i.test(ua)
       ? true
       : false;
-    globalEnv.isMobile = result;
+    wd.isMobile = result;
     return result;
   };
 
   // 判断目标对象是否为空对象（不是null）
   // @param {object} target 目标对象
   // @param {boolean?} shoudlIncludeInherited 为真时，考虑继承来的属性
-  globalEnv.isEmpty = function(target, shoudlIncludeInherited) {
+  wd.isEmpty = function(target, shoudlIncludeInherited) {
     switch (shoudlIncludeInherited) {
       case true:
         for (var anyKey in target) {
@@ -238,7 +255,7 @@
   };
 
   // 复制原始类型值或一般对象
-  globalEnv.clone = function(source) {
+  wd.clone = function(source) {
     var result;
     switch (typeof target) {
       case 'boolean':
@@ -269,7 +286,7 @@
   };
 
   // 返回去重的新数组（限定为基本类型值组成），原数组未改动
-  globalEnv.uniq = function(arr) {
+  wd.uniq = function(arr) {
     if (!Array.isArray(arr)) {
       throw new Error('Expected ARRAY to process.');
     }
@@ -294,7 +311,7 @@
   //  @param {string} arg1 目标cookie名
   //  @param {string} arg2 目标cookie值
   //  @param {number} arg3 有效天数
-  globalEnv.cookie = function(arg1, arg2, ar3) {
+  wd.cookie = function(arg1, arg2, ar3) {
     switch (arguments.length) {
       case 1:
         if (typeof arg1 !== 'string') {
@@ -334,7 +351,7 @@
   // 简易ajax方法
   // @param {string} url 目标url
   // @param {object} options 选项对象，应包含发送类型、数据（对象或查询字符串）、成功函数和失败函数
-  globalEnv.ajax = function(url, options) {
+  wd.ajax = function(url, options) {
     var type = options.type === undefined
       ? 'GET'
       : options.type;
@@ -944,7 +961,7 @@
       return this;
     };
 
-  })(globalEnv.Node.prototype);
+  })(wd.Node.prototype);
 
   /////////////////////////////////////////////
   ///////////////  处理string原型  //////////////
@@ -980,6 +997,6 @@
       return false;
     };
 
-  })(globalEnv.String.prototype);
+  })(wd.String.prototype);
 
 })(window);
