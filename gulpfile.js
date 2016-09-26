@@ -1,10 +1,13 @@
-var gulp = require('gulp'),
-  // concat = require('gulp-concat'),
-  sourcemaps = require('gulp-sourcemaps'),
-  plumber = require('gulp-plumber'),
-  jade = require('gulp-jade'),
-  babel = require('gulp-babel'),
-  livereload = require('gulp-livereload');
+var gulp = require('gulp');
+var webserver = require('gulp-webserver');
+var livereload = require('gulp-livereload');
+// var concat = require('gulp-concat');
+var sourcemaps = require('gulp-sourcemaps');
+var plumber = require('gulp-plumber');
+var jade = require('gulp-jade');
+var babel = require('gulp-babel');
+
+
 
 gulp.task('templates', function() {
   var jadeConfig = {
@@ -14,7 +17,7 @@ gulp.task('templates', function() {
     .pipe(plumber())
     .pipe(jade(jadeConfig))
     .pipe(gulp.dest('./dist'))
-    .pipe(livereload())
+    .pipe(livereload());
 });
 
 gulp.task('scripts', function() {
@@ -30,10 +33,21 @@ gulp.task('scripts', function() {
     .pipe(gulp.dest('./dist'));
 });
 
+gulp.task('webserver', function() {
+  gulp.src('./dist')
+    .pipe(webserver({
+      livereload: true,
+      open: true
+    }));
+});
 
-gulp.task('watch', function() {
-  livereload.listen({
-    basePath: './dist'
-  });
-  gulp.watch('./src/**/*', ['templates', 'scripts']);
+gulp.task('watcher', ['webserver'], function() {
+  gulp.watch('./src/**/*.jade', ['templates']);
+  gulp.watch('./src/**/*.js', ['scripts']);
+  livereload.listen();
+  gulp.watch('./dist', function(file) {
+    livereload.changed(file.path);
+  })
 })
+
+gulp.task('default', ['templates', 'scripts', 'watcher']);
