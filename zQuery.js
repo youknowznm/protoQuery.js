@@ -10,26 +10,6 @@
   /////////////////  基本方法  /////////////////
   /////////////////////////////////////////////
 
-  // // 判断单个节点是否含目标类
-  // const nodeHasClass = (tarNode, tarClass) => {
-  //   if (tarNode === undefined) {
-  //     return false;
-  //   }
-  //   if (!tarNode.nodeName !== 1) {
-  //     throw new Error('Expected ELEMENT NODE as target node.');
-  //   }
-  //   if (typeof tarClassName !== 'string') {
-  //     throw new Error('Expected STRING as target class name.');
-  //   }
-  //   const classArr = tarClass.className.split(/\s+/);
-  //   if (classArr[0] !== '') {
-  //     if (classArr.indexOf(tarClassName) > -1) {
-  //       return true;
-  //     }
-  //   }
-  //   return false;
-  // };
-
   // 判断单个节点是否符合单个选择器
   const nodeMatchesSelector = (tarNode, selector) => {
     if (!tarNode instanceof Node) {
@@ -385,19 +365,15 @@
               + '\nStatus Code:' + status);
     };
     let xhr = new XMLHttpRequest();
-    let xhrPromise = new Promise( (resolve, reject) => {
-      if (xhr.readyState !== 4) {
-        return;
+    xhr.onreadystatechange = function() {
+      if (this.readyState === 4) {
+        if (this.status === 200) {
+          onDone(xhr.responseText);
+        } else {
+          onFail(this.status);
+        }
       }
-      if (xhr.status === 200) {
-        resolve(xhr.responseText);
-      } else {
-        reject(xhr.status);
-      }
-    });
-    // (async function () => {
-    //   await xhrPromise;
-    // })();
+    };
     switch (type.toUpperCase()) {
       case 'GET':
         xhr.open('GET', url + '?' + data, true);
@@ -519,13 +495,13 @@
       if (typeof styleObj !== 'object') {
         throw new Error('Expected PLAIN OBJECT containing style key-value pairs.');
       }
-      var animationIdGruop = [];
+      let animationIdGruop = [];
       for (var i in styleObj) {
-        var id = transformSingleRule(this, i, styleObj[i]);
+        const id = transformSingleRule(this, i, styleObj[i]);
         animationIdGruop.push(id);
       }
       if (typeof callback === 'function') {
-        var callbackId = setInterval(function() {
+        const callbackId = setInterval(function() {
           for (var j in animationIdGruop) {
             if (zQueryUtil.onGoingAnimations[animationIdGruop[j]] === false) {
               return;
@@ -540,16 +516,14 @@
 
     // 返回元素相对于父定位元素之坐标
     nodePrototype.position = function() {
-      var top = this.offsetTop;
-      var left = this.offsetLeft;
-      return {top, left};
+      return {this.offsetTop, this.offsetLeft};
     };
 
     // 返回元素相对于浏览器窗口之坐标
     nodePrototype.offset = function() {
-      var top = this.offsetTop;
-      var left = this.offsetLeft;
-      var posParent = this.offsetParent;
+      let top = this.offsetTop;
+      let left = this.offsetLeft;
+      let posParent = this.offsetParent;
       while (posParent !== null) {
         top += posParent.offsetTop;
         left += posParent.offsetLeft;
@@ -690,8 +664,7 @@
     // @return {array.<node>} 元素节点对象构成之数组
     nodePrototype.matchedChildren = function(selector) {
       let result = [];
-      const directChildNodes = this.childNodes;
-      for (var child of directChildNodes) {
+      for (var child of this.childNodes) {
         if (child.nodeType === 1 && nodeMatchesSelector(child, selector)) {
           result.push(child);
         }
@@ -702,7 +675,7 @@
     // 返回目标元素之前的符合参数条件的最近的兄弟元素
     // @return {node} 元素节点或null
     nodePrototype.prev = function(selector) {
-      var prevSib = this.previousElementSibling;
+      let prevSib = this.previousElementSibling;
       while (prevSib !== null) {
         if (nodeMatchesSelector(prevSib, selector)) {
           return prevSib;
@@ -715,7 +688,7 @@
     // 返回目标元素之后的符合参数条件的最近的兄弟元素
     // @return {node} 元素节点或null
     nodePrototype.next = function(selector) {
-      var nextSib = this.nextElementSibling;
+      let nextSib = this.nextElementSibling;
       while (nextSib !== null) {
         if (nodeMatchesSelector(nextSib, selector)) {
           return nextSib;
@@ -728,8 +701,8 @@
     // 返回位于目标元素之前的所有符合参数条件的兄弟元素
     // @return {array.<node>} 元素节点对象构成之数组
     nodePrototype.prevAll = function(selector) {
-      var result = [];
-      var prevSib = this.previousElementSibling;
+      let result = [];
+      let prevSib = this.previousElementSibling;
       while (prevSib !== null) {
         if (nodeMatchesSelector(prevSib, selector)) {
           result.unshift(prevSib);
@@ -742,8 +715,8 @@
     // 返回位于目标元素之后的所有符合参数条件的兄弟元素
     // @return {array.<node>} 元素节点对象构成之数组
     nodePrototype.nextAll = function(selector) {
-      var result = [];
-      var nextSib = this.nextElementSibling;
+      let result = [];
+      let nextSib = this.nextElementSibling;
       while (nextSib !== null) {
         if (nodeMatchesSelector(nextSib, selector)) {
           result.push(nextSib);
@@ -762,8 +735,8 @@
     // 返回目标元素之前、符合参数条件的元素（如有）之后的所有兄弟元素
     // @return {array.<node>} 元素节点对象构成之数组
     nodePrototype.prevUntil = function(selector) {
-      var result = [];
-      var prevSib = this.previousElementSibling;
+      let result = [];
+      let prevSib = this.previousElementSibling;
       while (prevSib !== null) {
         if (nodeMatchesSelector(prevSib, selector)) {
           break;
@@ -777,8 +750,8 @@
     // 返回目标元素之后、符合参数条件的元素（如有）之前的所有兄弟元素
     // @return {array.<node>} 元素节点对象构成之数组
     nodePrototype.nextUntil = function(selector) {
-      var result = [];
-      var nextSib = this.nextElementSibling;
+      let result = [];
+      let nextSib = this.nextElementSibling;
       while (nextSib !== null) {
         if (nodeMatchesSelector(nextSib, selector)) {
           break;
@@ -885,8 +858,8 @@
       if (this.css('display') === 'none') {
         switch (option) {
           case 'transform':
-            var initWidth = parseInt(this.width());
-            var initHeight = parseInt(this.height());
+            let initWidth = parseInt(this.width());
+            let initHeight = parseInt(this.height());
             this.css({
               display : 'block',
               width : 0,
@@ -933,9 +906,8 @@
     };
     nodePrototype.fadeOut = function() {
       if (this.css('display') !== 'none') {
-        var that = this;
-        this.transform({'opacity': 0}, function() {
-          that.hide();
+        this.transform({'opacity': 0}, () => {
+          this.hide();
         });
       }
       return this;
@@ -943,7 +915,7 @@
     // 渐变高度以显示/隐藏元素
     nodePrototype.slideDown = function() {
       if (this.css('display') === 'none') {
-        var initHeight = parseInt(this.height());
+        let initHeight = parseInt(this.height());
         this.css({
           height : 0,
           display : 'block',
@@ -956,7 +928,7 @@
     };
     nodePrototype.slideUp = function() {
       if (this.css('display') !== 'none') {
-        var that = this;
+        let that = this;
         this.transform({'height': 0}, function() {
           that.hide();
         });
@@ -985,10 +957,10 @@
     // 判断字符串是否为有效日期，无法判断闰年
     stringPrototype.isValidDate = function() {
       if ((/^([012]\d\d\d)-(([01]\d)-([0123]\d))$/).test(this)) {
-        var y = + RegExp.$1;
-        var m = + RegExp.$3;
-        var d = + RegExp.$4;
-        var md = RegExp.$2;
+        let y = + RegExp.$1;
+        let m = + RegExp.$3;
+        let d = + RegExp.$4;
+        let md = RegExp.$2;
         if (y !== 0 && m !== 0 && d !== 0) {
           if (y < 2100 && m < 13 && d < 32) {
             if (['02-30', '02-31', '04-31', '06-31', '09-31', '11-31'].indexOf(md) === -1) {

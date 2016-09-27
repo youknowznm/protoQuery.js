@@ -8,7 +8,6 @@ var jade = require('gulp-jade');
 var babel = require('gulp-babel');
 
 
-
 gulp.task('templates', function() {
   var jadeConfig = {
     pretty: true
