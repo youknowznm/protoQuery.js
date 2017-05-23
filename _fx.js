@@ -1,6 +1,7 @@
 export default function handleFx(nodePrototype) {
 
     // 动效和捷径
+    const FLOAT_TYPE_STYLE = ['opacity'];
 
     let protoQueryUtil = {
         onGoingAnimations: {},
@@ -12,18 +13,19 @@ export default function handleFx(nodePrototype) {
     // @param {string} tarValue 目标样式值
     // @return {number} cycleId 动画标识id
     let transformSingleRule = function(ele, tarStyle, tarValue) {
-        let fullStyleValue = ele.css(tarStyle);
-        let currentValue = parseFloat(fullStyleValue);
+        let fullStyleValue = getComputedStyle(ele)[tarStyle]; // 完整样式值
+        let currentValue = parseFloat(fullStyleValue); // 样式数字部分。非数字则抛出异常
         if (!isFinite(currentValue)) {
             throw new Error('Expected a number-type style value.');
         }
-        if (FLOAT_TYPE_STYLE_NAMES.indexOf(tarStyle) > -1) {
+        let styleSuffix = fullStyleValue.match(/^[-\d]+(.*)$/)[1] || ''; // 非数字的后缀
+        if (FLOAT_TYPE_STYLE.indexOf(tarStyle) > -1) {
             currentValue *= 10000;
             tarValue *= 10000;
         }
         // #02 开始忽略了负值的情况
-        let styleSuffix = fullStyleValue.match(/^[-\d]+(.*)$/)[1] || '';
         let cycleId = setInterval(function() {
+            // let diff =
             switch (true) {
                 case currentValue < tarValue:
                     currentValue += Math.ceil((tarValue - currentValue) / 10);
@@ -35,7 +37,7 @@ export default function handleFx(nodePrototype) {
                     protoQueryUtil.onGoingAnimations[cycleId] = true;
                     clearInterval(cycleId);
             }
-            if (FLOAT_TYPE_STYLE_NAMES.indexOf(tarStyle) > -1) {
+            if (FLOAT_TYPE_STYLE.indexOf(tarStyle) > -1) {
                 ele.css(tarStyle, currentValue / 10000);
             } else {
                 ele.css(tarStyle, currentValue + styleSuffix);

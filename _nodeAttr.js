@@ -3,7 +3,6 @@ export default function handleNodeAttr(nodePrototype) {
     ///////////////  样式和属性  ///////////////
 
     const NUMBER_TYPE_STYLE = ['opacity'];
-    const FLOAT_TYPE_STYLE = ['opacity'];
 
     // 修改元素的单一样式
     let changeSingleRule = function(ele, name, value) {
