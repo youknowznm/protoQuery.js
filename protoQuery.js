@@ -6,22 +6,28 @@
  */
 
  import handleBasic from './_basic';
- import handleNodePrototype from './_node';
- import handleStringPrototype from './_string';
+ import handleNodeAttr from './_nodeAttr';
+ import handleNodeTrav from './_nodeTrav';
+ import handleNodeEvents from './_nodeEvents';
+ import handleFx from './_fx';
+ import handleStringProto from './_string';
  import addUtil from './_util';
 
 // 在文档结束渲染、开始加载内嵌资源时初始化
- document.onreadystatechange = function() {
-     if (document.readyState === 'interactive') {
-         initProtoQuery(window);
-     }
- };
+document.onreadystatechange = function() {
+    if (document.readyState === 'interactive') {
+        initProtoQuery(window);
+    }
+};
 
 let initProtoQuery = function(wd) {
 
     handleBasic(wd);
-    handleNodePrototype(wd.Node.prototype);
-    handleStringPrototype(wd.String.prototype);
+    handleNodeAttr(wd.Node.prototype);
+    handleNodeTrav(wd.Node.prototype);
+    handleNodeEvents(wd.Node.prototype);
+    handleFx(wd.Node.prototype);
+    handleStringProto(wd.String.prototype);
     addUtil(wd);
 
     let extendNodeFuncToArray = function(funcName) {

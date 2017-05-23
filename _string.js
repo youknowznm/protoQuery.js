@@ -1,4 +1,4 @@
-export default function handleStringPrototype(stringPrototype) {
+export default function handleStringProto(stringPrototype) {
 
     // 去除字符串首尾的空格
     if (stringPrototype.trim === undefined) {

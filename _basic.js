@@ -53,7 +53,6 @@ export default function handleBasic(wd) {
         }
         this.className = eleClassesArr.join(' ').trim();
         return this;
-
     };
 
     // 目标元素含指定类时移除，否则添加
@@ -69,14 +68,7 @@ export default function handleBasic(wd) {
         return this;
     };
 
-    //////////// 基本方法 ////////////
-
-    const NUMBER_TYPE_STYLE_NAMES = ['opacity'];
-    const FLOAT_TYPE_STYLE_NAMES = ['opacity'];
-
-    let zQueryUtil = {
-        onGoingAnimations: {},
-    };
+    //////////// 基本选择方法 ////////////
 
     /*
     判断单个节点是否符合单个选择器
@@ -197,114 +189,16 @@ export default function handleBasic(wd) {
         }
     };
 
-    /*
-    返回添加/删除监听的方法，兼容远古浏览器
-    @param {string|undefined} delegationSelector 要代理的元素选择器
-    */
-    let getOnFunc = function(ele, fn, delegationSelector) {
-        let _fn;
-        // 提供代理元素选择器则处理之
-        if (typeof delegationSelector === 'string') {
-            _fn = function(evtObj) {
-                if (evtObj.target.is(delegationSelector)) {
-                    fn.call(this, evtObj);
-                }
-            };
-        } else {
-            _fn = fn;
-        }
-        if (ele.addEventListener) {
-            return function(evtName) {
-                ele.addEventListener(evtName, _fn, false);
-            };
-        } else {
-            return function(evtName) {
-                ele.attachEvent('on' + evtName, _fn);
-            };
-        }
+    // 根据组合选择器字符串查询，返回元素下所有符合的元素
+    // @param {string} selectorGroup "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式以空格连接的查询字符串
+    // @return {array.<node>} 返回成员类型为node的数组或空数组
+    nodePrototype.protoQuery = function(selectorGroup) {
+        return multiQuery(selectorGroup, this);
     };
 
-    let getOffFunc = function(ele, evtName, fn) {
-        if (ele.removeEventListener) {
-            return function(evtName) {
-                ele.removeEventListener(evtName, fn, false);
-            };
-        } else {
-            return function(evtName) {
-                ele.detachEvent('on' + evtName, fn);
-            };
-        }
+    // 目标元素本身符合字符串时返回真
+    nodePrototype.is = function(selector) {
+        return nodeMatchesSelector(this, selector);
     };
 
-    /*
-    在单一元素上添加/删除单一监听函数
-    @param {node} ele 目标元素节点
-    @param {string} evts 单一或多个目标事件
-    @param {function} fn 监听函数
-    @param {object} options 'method'为'add'或'remove'；提供'delegationSelector'时代理监听
-    */
-    wd.handleSingleListener = function(ele, evts, fn, options) {
-        if (ele.nodeType !== 1) {
-            throw new Error('Expected ELEMENT NODE as target.')
-        }
-        if (typeof evts !== 'string') {
-            throw new Error('Expected STRING as target event(s).')
-        }
-        if (typeof fn !== 'function') {
-            throw new Error('Expected FUNCTION as event listener.')
-        }
-        let handleEachEvent = null;
-        switch (options.method) {
-            case 'add':
-                handleEachEvent = getOnFunc(ele, fn, options.delegationSelector);
-                break;
-            case 'remove':
-                handleEachEvent = getOffFunc(ele, fn);
-                break;
-        }
-        // 提供多个事件名时，分别添加该监听
-        let targetEvents = evts.split(/\s/);
-        for (let evt of targetEvents) {
-            handleEachEvent(evt);
-        }
-    };
-
-    // 基本动画（基于样式）
-    // @param {node} ele 目标元素
-    // @param {string} tarStyle 目标样式名
-    // @param {string} tarValue 目标样式值
-    // @return {number} cycleId 动画标识id
-    wd.transformSingleRule = function(ele, tarStyle, tarValue) {
-        let fullStyleValue = ele.css(tarStyle);
-        let currentValue = parseFloat(fullStyleValue);
-        if (!isFinite(currentValue)) {
-            throw new Error('Expected a number-type style value.');
-        }
-        if (FLOAT_TYPE_STYLE_NAMES.indexOf(tarStyle) > -1) {
-            currentValue *= 10000;
-            tarValue *= 10000;
-        }
-        // #02 开始忽略了负值的情况
-        let styleSuffix = fullStyleValue.match(/^[-\d]+(.*)$/)[1] || '';
-        let cycleId = setInterval(function() {
-            switch (true) {
-                case currentValue < tarValue:
-                    currentValue += Math.ceil((tarValue - currentValue) / 10);
-                    break;
-                case currentValue > tarValue:
-                    currentValue -= Math.ceil((currentValue - tarValue) / 10);
-                    break;
-                default:
-                    zQueryUtil.onGoingAnimations[cycleId] = true;
-                    clearInterval(cycleId);
-            }
-            if (FLOAT_TYPE_STYLE_NAMES.indexOf(tarStyle) > -1) {
-                ele.css(tarStyle, currentValue / 10000);
-            } else {
-                ele.css(tarStyle, currentValue + styleSuffix);
-            }
-        }, 20);
-        zQueryUtil.onGoingAnimations[cycleId] = false;
-        return cycleId;
-    };
 };
