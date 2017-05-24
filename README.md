@@ -1,6 +1,4 @@
 # protoQuery.js
-## 修改原生对象的原型以实现 jQuery 的常用接口
-
 
 ---
 
