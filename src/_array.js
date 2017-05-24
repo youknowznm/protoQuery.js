@@ -1,11 +1,11 @@
 export default function handleArray(arrayPrototype) {
 
-    //
+    // 在数组原型上添加一个方法：当实例的第一个元素为节点对象时，在该节点上调用对应的节点原型方法
     let extendNodeFuncToArray = function(funcName) {
         arrayPrototype[funcName] = function(...args) {
             let firstItem = this[0];
             if (firstItem instanceof Node) {
-                return wd.Node.prototype[funcName].apply(firstItem, args);
+                return window.Node.prototype[funcName].apply(firstItem, args);
             } else {
                 throw Error('Expected NODE as first item in array.')
             }

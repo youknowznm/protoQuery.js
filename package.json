@@ -1,0 +1,25 @@
+{
+  "name": "proto-query",
+  "version": "1.0.0",
+  "description": "",
+  "main": "webpackfile.js",
+  "dependencies": {
+    "webpack": "^2.6.0",
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-preset-es2015": "^6.24.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/youknowznm/protoQuery.git"
+  },
+  "author": "youknowznm",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/youknowznm/protoQuery/issues"
+  },
+  "homepage": "https://github.com/youknowznm/protoQuery#readme"
+}

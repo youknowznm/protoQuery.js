@@ -43,7 +43,6 @@ export default function handleBasic(wd) {
             throw new Error('Expected non-empty STRING as target class name(s).');
         }
         let tarClassesArr = tarClassesStr.split(/\s+/);
-        let eleClassesStr = this.className;
         let eleClassesArr = this.className.split(/\s+/);
         for (let i = 0; i < tarClassesArr.length; i++) {
             let pos = eleClassesArr.indexOf(tarClassesArr[i]);
@@ -153,11 +152,12 @@ export default function handleBasic(wd) {
     @return {array.<node>} 返回成员类型为node的数组或空数组
     */
     let multiQuery = wd.$ = function(selectorGroup, root) {
-        // 传入window或元素节点则直接放入数组中返回
+        // 传入元素节点则直接放入数组中返回
         if (selectorGroup.nodeType === 1) {
             return [selectorGroup];
         }
-        if (selectorGroup === window) {
+        // 传入window对象或'body'时返回body元素
+        if (selectorGroup === window || selectorGroup === 'body') {
             return [document.body];
         }
         // 选择器开头如有'body'去掉之
