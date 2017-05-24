@@ -1,6 +1,5 @@
 # protoQuery.js
 
----
 
 ``` JavaScript
 
