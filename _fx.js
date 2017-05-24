@@ -47,7 +47,6 @@ export default function handleFx(nodePrototype) {
         return cycleId;
     };
 
-
     // 渐变目标的一个或多个样式
     //  @param {object} arg1 键：样式名；值：样式值
     //  @param {function?} arg2 完成后的回调函数

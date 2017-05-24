@@ -4,15 +4,6 @@ export default function addUtil(wd) {
     //////////////  处理window对象  //////////////
     /////////////////////////////////////////////
 
-    // 在文档渲染结束、即将加载内嵌资源时，执行指定函数
-    wd.domReady = function(fn) {
-        document.onreadystatechange = function() {
-            if (document.readyState === 'interactive') {
-                fn();
-            }
-        };
-    };
-
     // 浏览器为移动端时设置全局变量isMobile为真，否则为假；并返回该值
     wd.detectMobile = function() {
         let ua = wd.navigator.userAgent;

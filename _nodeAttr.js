@@ -141,4 +141,13 @@ export default function handleNodeAttr(nodePrototype) {
         return r;
     };
 
+    // 读写元素的滚动高度
+    nodePrototype.scrollTop = function(tarValue) {
+        if (isFinite(parseInt(tarValue))) {
+            this.scrollTop = tarValue;
+            return this;
+        }
+        return this.scrollTop;
+    }
+
 };

@@ -161,11 +161,18 @@ export default function handleBasic(wd) {
 
     /*
     根据［组合］选择器字符串查询，返回目标元素下所有符合的元素
-    @param {string} selectorGroup 多个以空格连接的查询字符串
+    @param {string|node} selectorGroup 多个以空格连接的查询字符串
     @param {node|array|undefined} root 要处理的节点。不传入则以body为起点，传入第一项为节点的数组则以该项为起点
     @return {array.<node>} 返回成员类型为node的数组或空数组
     */
     let multiQuery = wd.$ = function(selectorGroup, root) {
+        // 传入window或元素节点则直接放入数组中返回
+        if (selectorGroup.nodeType === 1) {
+            return [selectorGroup];
+        }
+        if (selectorGroup === window) {
+            return [document.body];
+        }
         // 选择器开头如有'body'去掉之
         selectorGroup = selectorGroup.trim().replace(/^body\s+/, '');
         let selectorArr = selectorGroup.split(/\s+/);
