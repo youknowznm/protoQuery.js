@@ -1,13 +1,11 @@
 const webpack = require('webpack')
-const path = require('path')
-const fs = require('fs')
 
 module.exports = {
     watch: true,
     entry: './src/main.js',
     output: {
         path: __dirname,
-        filename: 'protoQuery.js',
+        filename: 'protoQuery.min.js',
     },
     module: {
         rules: [{
@@ -22,11 +20,11 @@ module.exports = {
         }],
     },
     plugins: [
-        // new webpack.optimize.UglifyJsPlugin({
-        //     sourceMap: true,
-        //     compress: {
-        //         warnings: true,
-        //     },
-        // }),
+        new webpack.optimize.UglifyJsPlugin({
+            sourceMap: true,
+            compress: {
+                warnings: true,
+            },
+        }),
     ],
 }
