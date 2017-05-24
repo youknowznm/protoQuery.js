@@ -1,8 +1,5 @@
 # protoQuery.js
-## 修改原生对象的原型以实现 jQuery 的常用接口
 
-
----
 
 ``` JavaScript
 
@@ -61,7 +58,6 @@ $(selector).slideUp() -> {node}
 事件
 */
 
- // 在文档渲染结束、即将加载内嵌资源时，执行指定函数
 $(selector).on(obj) -> {node}
 $(selector).on(events, function) -> {node}
 $(selector).on(events, delegationSelector, function) -> {node}
