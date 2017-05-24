@@ -55,19 +55,6 @@ export default function handleBasic(wd) {
         return this;
     };
 
-    // 目标元素含指定类时移除，否则添加
-    nodePrototype.toggleClass = function(tarClassName) {
-        if (typeof tarClassName !== 'string') {
-            throw new Error('Expected STRING as target class name.');
-        }
-        if (this.hasClass(tarClassName)) {
-            this.removeClass(tarClassName);
-        } else {
-            this.addClass(tarClassName);
-        }
-        return this;
-    };
-
     //////////// 基本选择方法 ////////////
 
     /*

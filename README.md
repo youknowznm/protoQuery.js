@@ -1,6 +1,6 @@
-# protoQuery
+# protoQuery.js
+## 修改原生对象的原型以实现 jQuery 的常用接口
 
-## 维护中
 
 ---
 
@@ -9,97 +9,104 @@
 /*
 选择器
 */
-window.query(selector) -> {array.<node>}
+
+$(selector) -> {array.<node>}
  // 根据组合选择器（"#header"，".item"，"ul"，"[type]"，"[type=radio]"，"\*"）查询，返回文档内所有符合的元素
-Node.is(selector) -> {boolean}
+$(selector).is(selector) -> {boolean}
  // 判断此元素是否符合选择器
-Node.query(selector) -> {array.<node>}
- // 根据组合选择器字符串查询，返回此元素下所有符合的元素
 
 /*
 属性与样式
- */
-Node.hasClass(className) -> {boolean}
+*/
+
+$(selector).hasClass(className) -> {boolean}
  // 判断此元素是否包含指定类名
-Node.addClass(className) -> {node}
- // 添加类
-Node.removeClass(className) -> {node}
- // 移除类
-Node.toggleClass(className) -> {node}
- // 已有则移除，否则添加之
-Node.attr(tarAttr, tarValue?) -> {node}
+$(selector).addClass(className) -> {node}
+ // 添加一个或多个类
+$(selector).removeClass(className) -> {node}
+ // 移除一个或多个类
+$(selector).attr(tarAttr, tarValue?) -> {string|node}
  // 获取或设置此元素的目标属性
-Node.html(tarHTML?) -> {node}
+$(selector).html(tarHTML?) -> {string|node}
  // 获取或设置此元素的innerHTML
-Node.css(tarStyle, tarValue?) -> {node|string|null}
+$(selector).text(text?) -> {string|node}
+// 获取或设置此元素的textContent
+$(selector).css(tarStyle, tarValue?) -> {node|string|null}
  // 获取或设置此元素的样式，传入一个对象时设置多条。目标值为整数时添加px单位
-Node.position() -> {object}
+$(selector).position() -> {object}
  // 返回元素相对于父定位元素之坐标
-Node.offset() -> {object}
+$(selector).offset() -> {object}
  // 返回元素相对于浏览器窗口之坐标
-Node.width(tarValue?) -> {node}
-Node.height(tarValue?) -> {node}
+$(selector).width(tarValue?) -> {string|node}
+$(selector).height(tarValue?) -> {string|node}
  // 读写元素的宽高
-Node.transform(styleObj, callback) -> {node}
+$(selector).innerWidth() -> {string}
+$(selector).innerHeight() -> {string}
+$(selector).outerWidth(includeMargin) -> {string}
+$(selector).outerHeight(includeMargin) -> {string}
+ // 读元素的含内外边距或边框的宽高
+$(selector).transform(styleObj, callback) -> {node}
  // 渐变目标的一个或多个样式，可提供回调函数
-Node.show(option?) -> {node}
-Node.hide(option?) -> {node}
+$(selector).show(option?) -> {node}
+$(selector).hide(option?) -> {node}
  // 显示/隐藏元素。参数为'transform'时从左上角开始动画，否则即时
-Node.fadeIn() -> {node}
-Node.fadeOut() -> {node}
+$(selector).fadeIn() -> {node}
+$(selector).fadeOut() -> {node}
  // 渐变透明度以显示/隐藏元素
-Node.slideDown() -> {node}
-Node.slideUp() -> {node}
+$(selector).slideDown() -> {node}
+$(selector).slideUp() -> {node}
  // 渐变高度以显示/隐藏元素
 
 /*
 事件
 */
-window.domReady(fn) -> {undefined}
+
  // 在文档渲染结束、即将加载内嵌资源时，执行指定函数
-Node.on(obj) -> {node}
-Node.on(events, function) -> {node}
-Node.on(events, delegationSelector, function) -> {node}
+$(selector).on(obj) -> {node}
+$(selector).on(events, function) -> {node}
+$(selector).on(events, delegationSelector, function) -> {node}
  // 直接添加或代理事件监听
-Node.off(obj) -> {node}
-Node.off(events, function) -> {node}
+$(selector).off(obj) -> {node}
+$(selector).off(events, function) -> {node}
  // 移除事件监听
 
 /*
 遍历
 */
-Node.parent() -> {node|null}
+
+$(selector).parent() -> {node|null}
  // 返回此元素的直接父元素
-Node.matchedParents(selector) -> {array.<node>}
+$(selector).matchedParents(selector) -> {array.<node>}
  // 返回此元素所有符合参数条件的父元素
-Node.parentsUntil(selector) -> {array.<node>}
+$(selector).parentsUntil(selector) -> {array.<node>}
  // 返回此元素之上、符合参数条件的元素（如有）之下的所有父元素
-Node.closest(selector) -> {node|null}
+$(selector).closest(selector) -> {node|null}
  // 返回目标元素的符合参数条件的最近的父元素，遍历包含元素自身
-Node.matchedChildren(selector) -> {array.<node>}
+$(selector).matchedChildren(selector) -> {array.<node>}
  // 返回此元素所有符合参数条件的直接子元素
-Node.prev(selector) -> {node|null}
+$(selector).prev(selector) -> {node|null}
  // 返回此元素之前的符合参数条件的最近的兄弟元素
-Node.next(selector) -> {node|null}
+$(selector).next(selector) -> {node|null}
  // 返回此元素之后的符合参数条件的最近的兄弟元素
-Node.prevAll(selector) -> {array.<node>}
+$(selector).prevAll(selector) -> {array.<node>}
  // 返回此元素之前的所有符合参数条件的兄弟元素
-Node.nextAll(selector) -> {array.<node>}
+$(selector).nextAll(selector) -> {array.<node>}
  // 返回此元素之后的所有符合参数条件的兄弟元素
-Node.siblings(selector) -> {array.<node>}
+$(selector).siblings(selector) -> {array.<node>}
  // 返回此元素的所有符合参数条件的兄弟元素
-Node.prevUntil(selector) -> {array.<node>}
+$(selector).prevUntil(selector) -> {array.<node>}
  // 返回此元素之前、符合参数条件的元素（如有）之后的所有兄弟元素
-Node.nextUntil(selector) -> {array.<node>}
+$(selector).nextUntil(selector) -> {array.<node>}
  // 返回此元素之后、符合参数条件的元素（如有）之前的所有兄弟元素
-Node.prependChild(node) -> {node}
- // 在当前元素的第一个子元素前插入目标元素。与Node.appendChild()对应
-Node.insertAfter(newNode, referenceNode) -> {node}
- // 在此元素的referenceNode子元素前添加目标元素。与Node.insertBefore()对应
+$(selector).prependChild(node) -> {node}
+ // 在当前元素的第一个子元素前插入目标元素。与$(selector).appendChild()对应
+$(selector).insertAfter(newNode, referenceNode) -> {node}
+ // 在此元素的referenceNode子元素前添加目标元素。与$(selector).insertBefore()对应
 
 /*
 字符串处理
 */
+
 String.trim() -> {string}
  // 去除字符串首尾的空格
 String.isEmail() -> {boolean}
@@ -110,6 +117,7 @@ String.isValidDate() -> {boolean}
 /*
 杂项
 */
+
 Window.clone(source) -> {string|number|boolean|object}
  // 复制原始类型值或一般对象
 Window.uniq(arr) -> {array}
