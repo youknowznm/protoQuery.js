@@ -7,11 +7,12 @@ export default function handleFx(nodePrototype) {
         onGoingAnimations: {},
     };
 
-    // 基本动画（基于样式）
-    // @param {node} ele 目标元素
-    // @param {string} tarStyle 目标样式名
-    // @param {string} tarValue 目标样式值
-    // @return {number} cycleId 动画标识id
+    /** 基本动画（基于样式）
+    * @param {node} ele 目标元素
+    * @param {string} tarStyle 目标样式名
+    * @param {string} tarValue 目标样式值
+    * @return {number} cycleId 动画标识id
+    */
     let transformSingleRule = function(ele, tarStyle, tarValue) {
         let fullStyleValue = getComputedStyle(ele)[tarStyle]; // 完整样式值
         let currentValue = parseFloat(fullStyleValue); // 样式数字部分。非数字则抛出异常
@@ -47,9 +48,10 @@ export default function handleFx(nodePrototype) {
         return cycleId;
     };
 
-    // 渐变目标的一个或多个样式
-    //  @param {object} arg1 键：样式名；值：样式值
-    //  @param {function?} arg2 完成后的回调函数
+    /** 渐变目标的一个或多个样式
+    * @param {object} arg1 键：样式名；值：样式值
+    * @param {function?} arg2 完成后的回调函数
+    */
     nodePrototype.transform = function(styleObj, callback) {
         if (typeof styleObj !== 'object') {
             throw new Error('Expected PLAIN OBJECT containing style key-value pairs.');

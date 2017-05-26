@@ -2,9 +2,9 @@ export default function handleNodeEvents(nodePrototype) {
 
     ///////////////  事件  ///////////////
 
-    /*
-    返回添加/删除监听的方法，兼容远古浏览器
-    @param {string|undefined} delegationSelector 要代理的元素选择器
+    /**
+    * 返回添加/删除监听的方法，兼容远古浏览器
+    * @param {string|undefined} delegationSelector 要代理的元素选择器
     */
     let getOnFunc = function(ele, fn, delegationSelector) {
         let _fn;
@@ -41,12 +41,12 @@ export default function handleNodeEvents(nodePrototype) {
         }
     };
 
-    /*
-    在单一元素上添加/删除单一监听函数
-    @param {node} ele 目标元素节点
-    @param {string} evts 单一或多个目标事件
-    @param {function} fn 监听函数
-    @param {object} options 'method'为'add'或'remove'；提供'delegationSelector'时代理监听
+    /**
+    * 在单一元素上添加/删除单一监听函数
+    * @param {node} ele 目标元素节点
+    * @param {string} evts 单一或多个目标事件
+    * @param {function} fn 监听函数
+    * @param {object} options 'method'为'add'或'remove'；提供'delegationSelector'时代理监听
     */
     let handleSingleListener = function(ele, evts, fn, options) {
         if (ele.nodeType !== 1) {
@@ -74,16 +74,17 @@ export default function handleNodeEvents(nodePrototype) {
         }
     };
 
-    // 添加事件监听
-    //  1 arg
-    //  @param {object} arg1 键：一个或多个事件名；值：该事件的监听函数
-    //  2 arg
-    //  @param {string} arg1 一个或多个事件名
-    //  @param {function} arg2 监听函数
-    //  3 arg
-    //  @param {string} arg1 一个或多个事件名
-    //  @param {string} arg2 被代理者的选择字符串
-    //  @param {function} arg3 监听函数
+    /**  添加事件监听
+    *  1 arg
+    *  @param {object} arg1 键：一个或多个事件名；值：该事件的监听函数
+    *  2 arg
+    *  @param {string} arg1 一个或多个事件名
+    *  @param {function} arg2 监听函数
+    *  3 arg
+    *  @param {string} arg1 一个或多个事件名
+    *  @param {string} arg2 被代理者的选择字符串
+    *  @param {function} arg3 监听函数
+    */
     nodePrototype.on = function(arg1, arg2, arg3) {
         switch (arguments.length) {
             case 1:
@@ -130,12 +131,13 @@ export default function handleNodeEvents(nodePrototype) {
         }
     };
 
-    // 移除事件监听。未提供代理移除的方法
-    //  1 arg
-    //  @param {object} arg1 键：一个或多个事件名；值：该事件的监听函数
-    //  2 arg
-    //  @param {string} arg1 一个或多个事件名
-    //  @param {function} arg2 监听函数
+    /**  移除事件监听。未提供代理移除的方法
+    * 1 arg
+    * @param {object} arg1 键：一个或多个事件名；值：该事件的监听函数
+    * 2 arg
+    * @param {string} arg1 一个或多个事件名
+    * @param {function} arg2 监听函数
+    */
     nodePrototype.off = function(arg1, arg2) {
         switch (arguments.length) {
             case 1:

@@ -79,7 +79,10 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = handleArray;
 function handleArray(arrayPrototype) {
 
-    // 在数组原型上添加一个方法：当实例的第一个元素为节点对象时，在该节点上调用对应的节点原型方法
+    /**
+    在数组原型上添加一个方法：当实例的第一个元素为节点对象时，在该节点上调用对应的节点原型方法
+    @param {string} funcName 已在Node原型上添加的方法名
+    */
     var extendNodeFuncToArray = function extendNodeFuncToArray(funcName) {
         arrayPrototype[funcName] = function () {
             var firstItem = this[0];
@@ -99,6 +102,10 @@ function handleArray(arrayPrototype) {
         extendNodeFuncToArray(i);
     });
 
+    /**
+    为数组每一项执行一个方法，传入改项为this
+    @param {function} fn 要执行的方法
+    */
     arrayPrototype.each = function (fn) {
         var _iteratorNormalCompletion = true;
         var _didIteratorError = false;
@@ -198,7 +205,7 @@ function handleBasic(wd) {
 
     //////////// 基本选择方法 ////////////
 
-    /*
+    /**
     判断单个节点是否符合单个选择器
     @param {node} tarNode 目标节点
     @param {string} selector "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式的［单个］查询字符串
@@ -266,7 +273,7 @@ function handleBasic(wd) {
         }
     };
 
-    /*
+    /**
     处理根元素参数
     @param {node|array|undefined} root 要处理的节点。不传入则以body为起点，传入第一项为节点的数组则以该项为起点
     @return {node}
@@ -286,7 +293,7 @@ function handleBasic(wd) {
         return r;
     };
 
-    /*
+    /**
     根据［单个］选择器字符串查询，返回目标元素下所有符合的元素
     @param {string} selector 单个查询字符串
     @param {node|array|undefined} root 要处理的节点。不传入则以body为起点，传入第一项为节点的数组则以该项为起点
@@ -309,7 +316,7 @@ function handleBasic(wd) {
         return result;
     };
 
-    /*
+    /**
     根据［组合］选择器字符串查询，返回目标元素下所有符合的元素
     @param {string|node} selectorGroup 多个以空格连接的查询字符串
     @param {node|array|undefined} root 要处理的节点。不传入则以body为起点，传入第一项为节点的数组则以该项为起点
@@ -381,11 +388,12 @@ function handleFx(nodePrototype) {
         onGoingAnimations: {}
     };
 
-    // 基本动画（基于样式）
-    // @param {node} ele 目标元素
-    // @param {string} tarStyle 目标样式名
-    // @param {string} tarValue 目标样式值
-    // @return {number} cycleId 动画标识id
+    /** 基本动画（基于样式）
+    * @param {node} ele 目标元素
+    * @param {string} tarStyle 目标样式名
+    * @param {string} tarValue 目标样式值
+    * @return {number} cycleId 动画标识id
+    */
     var transformSingleRule = function transformSingleRule(ele, tarStyle, tarValue) {
         var fullStyleValue = getComputedStyle(ele)[tarStyle]; // 完整样式值
         var currentValue = parseFloat(fullStyleValue); // 样式数字部分。非数字则抛出异常
@@ -421,9 +429,10 @@ function handleFx(nodePrototype) {
         return cycleId;
     };
 
-    // 渐变目标的一个或多个样式
-    //  @param {object} arg1 键：样式名；值：样式值
-    //  @param {function?} arg2 完成后的回调函数
+    /** 渐变目标的一个或多个样式
+    * @param {object} arg1 键：样式名；值：样式值
+    * @param {function?} arg2 完成后的回调函数
+    */
     nodePrototype.transform = function (styleObj, callback) {
         if ((typeof styleObj === 'undefined' ? 'undefined' : _typeof(styleObj)) !== 'object') {
             throw new Error('Expected PLAIN OBJECT containing style key-value pairs.');
@@ -565,10 +574,11 @@ function handleNodeAttr(nodePrototype) {
         ele.style[name] = value;
     };
 
-    // 设置或读取目标元素的样式
-    // @param {string|object} arg1 只提供此参数：为数值时返回该样式值；为对象时设置元素的多条规则
-    // @param {string|number?} arg2 提供时设置指定样式的值
-    // @return {node|string|null} 读取时返回字符串或null；设置时返回自身
+    /**  设置或读取目标元素的样式
+    * @param {string|object} arg1 只提供此参数：为数值时返回该样式值；为对象时设置元素的多条规则
+    * @param {string|number?} arg2 提供时设置指定样式的值
+    * @return {node|string|null} 读取时返回字符串或null；设置时返回自身
+    */
     nodePrototype.css = function (arg1, arg2) {
         switch (arguments.length) {
             case 1:
@@ -713,9 +723,9 @@ function handleNodeEvents(nodePrototype) {
 
     ///////////////  事件  ///////////////
 
-    /*
-    返回添加/删除监听的方法，兼容远古浏览器
-    @param {string|undefined} delegationSelector 要代理的元素选择器
+    /**
+    * 返回添加/删除监听的方法，兼容远古浏览器
+    * @param {string|undefined} delegationSelector 要代理的元素选择器
     */
     var getOnFunc = function getOnFunc(ele, fn, delegationSelector) {
         var _fn = void 0;
@@ -752,12 +762,12 @@ function handleNodeEvents(nodePrototype) {
         }
     };
 
-    /*
-    在单一元素上添加/删除单一监听函数
-    @param {node} ele 目标元素节点
-    @param {string} evts 单一或多个目标事件
-    @param {function} fn 监听函数
-    @param {object} options 'method'为'add'或'remove'；提供'delegationSelector'时代理监听
+    /**
+    * 在单一元素上添加/删除单一监听函数
+    * @param {node} ele 目标元素节点
+    * @param {string} evts 单一或多个目标事件
+    * @param {function} fn 监听函数
+    * @param {object} options 'method'为'add'或'remove'；提供'delegationSelector'时代理监听
     */
     var handleSingleListener = function handleSingleListener(ele, evts, fn, options) {
         if (ele.nodeType !== 1) {
@@ -806,16 +816,17 @@ function handleNodeEvents(nodePrototype) {
         }
     };
 
-    // 添加事件监听
-    //  1 arg
-    //  @param {object} arg1 键：一个或多个事件名；值：该事件的监听函数
-    //  2 arg
-    //  @param {string} arg1 一个或多个事件名
-    //  @param {function} arg2 监听函数
-    //  3 arg
-    //  @param {string} arg1 一个或多个事件名
-    //  @param {string} arg2 被代理者的选择字符串
-    //  @param {function} arg3 监听函数
+    /**  添加事件监听
+    *  1 arg
+    *  @param {object} arg1 键：一个或多个事件名；值：该事件的监听函数
+    *  2 arg
+    *  @param {string} arg1 一个或多个事件名
+    *  @param {function} arg2 监听函数
+    *  3 arg
+    *  @param {string} arg1 一个或多个事件名
+    *  @param {string} arg2 被代理者的选择字符串
+    *  @param {function} arg3 监听函数
+    */
     nodePrototype.on = function (arg1, arg2, arg3) {
         switch (arguments.length) {
             case 1:
@@ -859,12 +870,13 @@ function handleNodeEvents(nodePrototype) {
         }
     };
 
-    // 移除事件监听。未提供代理移除的方法
-    //  1 arg
-    //  @param {object} arg1 键：一个或多个事件名；值：该事件的监听函数
-    //  2 arg
-    //  @param {string} arg1 一个或多个事件名
-    //  @param {function} arg2 监听函数
+    /**  移除事件监听。未提供代理移除的方法
+    * 1 arg
+    * @param {object} arg1 键：一个或多个事件名；值：该事件的监听函数
+    * 2 arg
+    * @param {string} arg1 一个或多个事件名
+    * @param {function} arg2 监听函数
+    */
     nodePrototype.off = function (arg1, arg2) {
         switch (arguments.length) {
             case 1:
@@ -909,8 +921,9 @@ function handleNodeTrav(nodePrototype) {
 
     ///////////////  选择和遍历  ///////////////
 
-    // 在当前元素的第一个子元素前插入目标元素
+    /** 在当前元素的第一个子元素前插入目标元素
     // @return {node} 插入的新元素节点
+    */
     nodePrototype.prepend = function (tarNode) {
         if (tarNode.nodeType !== 1) {
             throw new Error('Expected ELEMENT NODE as target node.');
@@ -919,9 +932,10 @@ function handleNodeTrav(nodePrototype) {
         return tarNode;
     };
 
-    // @param {node} newNode 新元素节点
+    /**  @param {node} newNode 新元素节点
     // @param {node} referenceNode 比照元素节点
     // @return {node} 插入的新元素节点
+    */
     nodePrototype.insertAfter = function (newNode, referenceNode) {
         if (newNode.nodeType !== 1) {
             throw new Error('Expected ELEMENT NODE as target node.');
@@ -937,8 +951,9 @@ function handleNodeTrav(nodePrototype) {
         return newNode;
     };
 
-    // 返回目标元素的直接父元素
+    /**  返回目标元素的直接父元素
     // @return {node} 元素节点或null
+    */
     nodePrototype.parent = function () {
         var tarElement = this.parentNode;
         while (true) {
@@ -964,8 +979,9 @@ function handleNodeTrav(nodePrototype) {
         return result;
     };
 
-    // 返回目标元素的不符合参数条件的所有父元素
+    /**  返回目标元素的不符合参数条件的所有父元素
     // @return {array.<node>} 元素节点对象构成之数组
+    */
     nodePrototype.parentsUntil = function (selector) {
         var result = [];
         var currentNode = this.parent();
@@ -980,8 +996,9 @@ function handleNodeTrav(nodePrototype) {
         return result;
     };
 
-    // 返回目标元素的符合参数条件的最近的父元素，遍历包含元素自身
+    /** 返回目标元素的符合参数条件的最近的父元素，遍历包含元素自身
     // @return {node} 元素节点或null
+    */
     nodePrototype.closest = function (selector) {
         var currentNode = this;
         while (currentNode !== null) {
@@ -994,8 +1011,9 @@ function handleNodeTrav(nodePrototype) {
         return null;
     };
 
-    // 返回目标元素的符合参数条件的直接子元素
+    /** 返回目标元素的符合参数条件的直接子元素
     // @return {array.<node>} 元素节点对象构成之数组
+    */
     nodePrototype.children = function (selector) {
         var result = [];
         var _iteratorNormalCompletion = true;
@@ -1028,8 +1046,9 @@ function handleNodeTrav(nodePrototype) {
         return result;
     };
 
-    // 返回目标元素之前的符合参数条件的最近的兄弟元素
+    /** 返回目标元素之前的符合参数条件的最近的兄弟元素
     // @return {node} 元素节点或null
+    */
     nodePrototype.prev = function (selector) {
         var prevSib = this.previousElementSibling;
         while (prevSib !== null) {
@@ -1041,8 +1060,9 @@ function handleNodeTrav(nodePrototype) {
         return null;
     };
 
-    // 返回目标元素之后的符合参数条件的最近的兄弟元素
+    /**  返回目标元素之后的符合参数条件的最近的兄弟元素
     // @return {node} 元素节点或null
+    */
     nodePrototype.next = function (selector) {
         var nextSib = this.nextElementSibling;
         while (nextSib !== null) {
@@ -1054,8 +1074,9 @@ function handleNodeTrav(nodePrototype) {
         return null;
     };
 
-    // 返回位于目标元素之前的所有符合参数条件的兄弟元素
+    /**  返回位于目标元素之前的所有符合参数条件的兄弟元素
     // @return {array.<node>} 元素节点对象构成之数组
+    */
     nodePrototype.prevAll = function (selector) {
         var result = [];
         var prevSib = this.previousElementSibling;
@@ -1068,8 +1089,9 @@ function handleNodeTrav(nodePrototype) {
         return result;
     };
 
-    // 返回位于目标元素之后的所有符合参数条件的兄弟元素
+    /** 返回位于目标元素之后的所有符合参数条件的兄弟元素
     // @return {array.<node>} 元素节点对象构成之数组
+    */
     nodePrototype.nextAll = function (selector) {
         var result = [];
         var nextSib = this.nextElementSibling;
@@ -1082,14 +1104,16 @@ function handleNodeTrav(nodePrototype) {
         return result;
     };
 
-    // 返回目标元素的所有符合参数条件的兄弟元素
+    /** 返回目标元素的所有符合参数条件的兄弟元素
     // @return {array.<node>} 元素节点对象构成之数组
+    */
     nodePrototype.siblings = function (selector) {
         return this.prevAll(selector).concat(this.nextAll(selector));
     };
 
-    // 返回目标元素之前、符合参数条件的元素（如有）之后的所有兄弟元素
+    /** 返回目标元素之前、符合参数条件的元素（如有）之后的所有兄弟元素
     // @return {array.<node>} 元素节点对象构成之数组
+    */
     nodePrototype.prevUntil = function (selector) {
         var result = [];
         var prevSib = this.previousElementSibling;
@@ -1103,8 +1127,9 @@ function handleNodeTrav(nodePrototype) {
         return result;
     };
 
-    // 返回目标元素之后、符合参数条件的元素（如有）之前的所有兄弟元素
+    /** 返回目标元素之后、符合参数条件的元素（如有）之前的所有兄弟元素
     // @return {array.<node>} 元素节点对象构成之数组
+    */
     nodePrototype.nextUntil = function (selector) {
         var result = [];
         var nextSib = this.nextElementSibling;
@@ -1192,9 +1217,10 @@ function addUtil(wd) {
         return result;
     };
 
-    // 判断目标对象是否为空对象（不是null）
+    /** 判断目标对象是否为空对象（不是null）
     // @param {object} target 目标对象
     // @param {boolean?} shoudlIncludeInherited 为真时，考虑继承来的属性
+    */
     wd.isEmpty = function (target, shoudlIncludeInherited) {
         switch (shoudlIncludeInherited) {
             case true:
@@ -1259,7 +1285,7 @@ function addUtil(wd) {
         return Array.from(new Set(arr));
     };
 
-    // 读写cookie
+    /**  读写cookie
     //  1 arg
     //  @param {string} arg1 目标cookie名
     //  @return {string} cookie值或空字符串
@@ -1270,6 +1296,7 @@ function addUtil(wd) {
     //  @param {string} arg1 目标cookie名
     //  @param {string} arg2 目标cookie值
     //  @param {number} arg3 有效天数
+    */
     wd.cookie = function (arg1, arg2, ar3) {
         switch (arguments.length) {
             case 1:
@@ -1305,9 +1332,10 @@ function addUtil(wd) {
         }
     };
 
-    // 简易ajax方法
+    /** 简易ajax方法
     // @param {string} url 目标url
     // @param {object} options 选项对象，应包含发送类型、数据（对象或查询字符串）、成功函数和失败函数
+    */
     wd.ajax = function (url, _ref) {
         var _ref$type = _ref.type,
             type = _ref$type === undefined ? 'GET' : _ref$type;

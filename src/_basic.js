@@ -56,7 +56,7 @@ export default function handleBasic(wd) {
 
     //////////// 基本选择方法 ////////////
 
-    /*
+    /**
     判断单个节点是否符合单个选择器
     @param {node} tarNode 目标节点
     @param {string} selector "#header"，".item"，"ul"，"[type]"，"[type=radio]"形式的［单个］查询字符串
@@ -102,7 +102,7 @@ export default function handleBasic(wd) {
         }
     };
 
-    /*
+    /**
     处理根元素参数
     @param {node|array|undefined} root 要处理的节点。不传入则以body为起点，传入第一项为节点的数组则以该项为起点
     @return {node}
@@ -122,7 +122,7 @@ export default function handleBasic(wd) {
         return r;
     };
 
-    /*
+    /**
     根据［单个］选择器字符串查询，返回目标元素下所有符合的元素
     @param {string} selector 单个查询字符串
     @param {node|array|undefined} root 要处理的节点。不传入则以body为起点，传入第一项为节点的数组则以该项为起点
@@ -145,7 +145,7 @@ export default function handleBasic(wd) {
         return result;
     };
 
-    /*
+    /**
     根据［组合］选择器字符串查询，返回目标元素下所有符合的元素
     @param {string|node} selectorGroup 多个以空格连接的查询字符串
     @param {node|array|undefined} root 要处理的节点。不传入则以body为起点，传入第一项为节点的数组则以该项为起点

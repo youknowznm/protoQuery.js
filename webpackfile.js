@@ -5,7 +5,7 @@ module.exports = {
     entry: './src/main.js',
     output: {
         path: __dirname,
-        filename: 'protoQuery.min.js',
+        filename: 'protoQuery.js',
     },
     module: {
         rules: [{
@@ -20,11 +20,11 @@ module.exports = {
         }],
     },
     plugins: [
-        new webpack.optimize.UglifyJsPlugin({
-            sourceMap: true,
-            compress: {
-                warnings: true,
-            },
-        }),
+        // new webpack.optimize.UglifyJsPlugin({
+        //     sourceMap: true,
+        //     compress: {
+        //         warnings: true,
+        //     },
+        // }),
     ],
 }

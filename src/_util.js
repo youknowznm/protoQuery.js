@@ -14,9 +14,10 @@ export default function addUtil(wd) {
         return result;
     };
 
-    // 判断目标对象是否为空对象（不是null）
+    /** 判断目标对象是否为空对象（不是null）
     // @param {object} target 目标对象
     // @param {boolean?} shoudlIncludeInherited 为真时，考虑继承来的属性
+    */
     wd.isEmpty = function(target, shoudlIncludeInherited) {
         switch (shoudlIncludeInherited) {
             case true:
@@ -81,7 +82,7 @@ export default function addUtil(wd) {
         return Array.from(new Set(arr));
     };
 
-    // 读写cookie
+    /**  读写cookie
     //  1 arg
     //  @param {string} arg1 目标cookie名
     //  @return {string} cookie值或空字符串
@@ -92,6 +93,7 @@ export default function addUtil(wd) {
     //  @param {string} arg1 目标cookie名
     //  @param {string} arg2 目标cookie值
     //  @param {number} arg3 有效天数
+    */
     wd.cookie = function(arg1, arg2, ar3) {
         switch (arguments.length) {
             case 1:
@@ -127,9 +129,10 @@ export default function addUtil(wd) {
         }
     };
 
-    // 简易ajax方法
+    /** 简易ajax方法
     // @param {string} url 目标url
     // @param {object} options 选项对象，应包含发送类型、数据（对象或查询字符串）、成功函数和失败函数
+    */
     wd.ajax = function(url, {type = 'GET'}) {
         let data;
         switch (typeof options.data) {

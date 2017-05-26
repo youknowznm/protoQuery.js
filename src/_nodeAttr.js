@@ -12,10 +12,11 @@ export default function handleNodeAttr(nodePrototype) {
         ele.style[name] = value;
     };
 
-    // 设置或读取目标元素的样式
-    // @param {string|object} arg1 只提供此参数：为数值时返回该样式值；为对象时设置元素的多条规则
-    // @param {string|number?} arg2 提供时设置指定样式的值
-    // @return {node|string|null} 读取时返回字符串或null；设置时返回自身
+    /**  设置或读取目标元素的样式
+    * @param {string|object} arg1 只提供此参数：为数值时返回该样式值；为对象时设置元素的多条规则
+    * @param {string|number?} arg2 提供时设置指定样式的值
+    * @return {node|string|null} 读取时返回字符串或null；设置时返回自身
+    */
     nodePrototype.css = function(arg1, arg2) {
         switch (arguments.length) {
             case 1:
