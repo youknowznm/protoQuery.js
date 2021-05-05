@@ -1,5 +1,7 @@
 # protoQuery.js
 
+修改原生对象的原型以实现 jQuery 的常用接口.  
+练手写的, 触碰了原型, 不太适用于现代化的前端工程.
 
 ``` JavaScript
 
